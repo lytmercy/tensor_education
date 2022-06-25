@@ -1,4 +1,4 @@
-from tensor_fundamental import tensor_00
+from tensor_00_fundamental import tensor_00_0_creating
 import tensor_check
 
 
@@ -9,7 +9,7 @@ def main():
     # tensor_check.run()
 
     # script for tensor part 00 of curriculum
-    tensor_00.run()
+    tensor_00_0_creating.run()
 
 
 if __name__ == "__main__":
