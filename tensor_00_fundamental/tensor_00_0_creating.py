@@ -3,7 +3,7 @@ import numpy as np
 
 
 def run():
-    """00. Getting started with TensorFlow"""
+    """00.0 Creating tensors"""
 
     '''Creating Tensors with tf.constant()'''
     # Create a scalar (rank 0 tensor)
@@ -140,7 +140,4 @@ def run():
                     shape=[2, 4, 3])  # note: the shape total (2*4*3) has to match the number of elements in the array
     print(numpy_A)
     print(A)
-
-
-
 
