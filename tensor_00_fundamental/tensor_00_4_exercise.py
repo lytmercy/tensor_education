@@ -22,7 +22,7 @@ def run():
     # Create a scalar
     # scalar = tf.constant(384)
     # Create a vector
-    vector = tf.constant([38., 20., 4., 18.])
+    # vector = tf.constant([38., 20., 4., 18.])
     # Create a matrix
     # matrix = tf.constant([[32, 324, 98, 199],
     #                       [23, 723, 83, 27]])
@@ -49,7 +49,7 @@ def run():
     '''Exercise - 3'''
 
     # Creating two tensors with random values
-    gen = tf.random.Generator.from_non_deterministic_state()
+    # gen = tf.random.Generator.from_non_deterministic_state()
     # T = gen.uniform(shape=[5, 300])
     # F = gen.uniform(shape=[5, 300])
     # print(f"Tensor T:\n{T}")
