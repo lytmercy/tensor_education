@@ -3,9 +3,30 @@ from keras.utils import plot_model
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 # Import class for init data
 from tensor_01_regression.regression_data_class import RegressionData
+
+
+# Create function for plotting
+def plot_predictions(train_data,
+                     train_labels,
+                     test_data,
+                     test_labels,
+                     predictions):
+    """
+    Plots training data, test data and compares predictions.
+    """
+
+    plt.figure(figsize=(10, 7))
+    # Plot training data in blue
+    plt.scatter(train_data, train_labels, c="b", label="Training data")
+    # Plot test data in green
+    plt.scatter(test_data, test_labels, c="g", label="Test data")
+    # Plot the predictions in red (predictions were made on the test data)
+    plt.scatter(test_data, predictions, c="r", label="Predictions")
+    # Show the legend
+    plt.legend()
+    plt.show()
 
 
 def run():
@@ -91,26 +112,6 @@ def run():
     # View the predictions
     # print(y_preds)
 
-    # Create function for plotting
-    def plot_predictions(train_data=X_train,
-                         train_labels=y_train,
-                         test_data=X_test,
-                         test_labels=y_test,
-                         predictions=y_preds):
-        """
-        Plots training data, test data and compares predictions.
-        """
-
-        plt.figure(figsize=(10, 7))
-        # Plot training data in blue
-        plt.scatter(train_data, train_labels, c="b", label="Training data")
-        # Plot test data in green
-        plt.scatter(test_data, test_labels, c="g", label="Test data")
-        # Plot the predictions in red (predictions were made on the test data)
-        plt.scatter(test_data, predictions, c="r", label="Predictions")
-        # Show the legend
-        plt.legend()
-        plt.show()
-
+    # Using function for plotting prediction
     plot_predictions(X_train, y_train, X_test, y_test, y_preds)
 
