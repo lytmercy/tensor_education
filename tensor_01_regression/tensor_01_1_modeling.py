@@ -46,7 +46,7 @@ def run():
     - The data - what data are you working with? What does it look like?
     - The model itself - what does the architecture look like? What are the different shapes?
     - The training of a model - how does a model perform while it learns?
-    - The predicitons of a model - how do the predictions of a model line up 
+    - The predictions of a model - how do the predictions of a model line up 
     against the ground truth (the original labels?)
     """
 

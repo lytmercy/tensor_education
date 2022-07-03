@@ -114,4 +114,3 @@ def run():
 
     # Using function for plotting prediction
     plot_predictions(X_train, y_train, X_test, y_test, y_preds)
-

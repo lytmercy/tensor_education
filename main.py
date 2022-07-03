@@ -7,6 +7,9 @@ from tensor_00_fundamental import tensor_00_4_exercise
 from tensor_01_regression import tensor_01_0_beginning, tensor_01_1_modeling
 from tensor_01_regression import tensor_01_2_visualizing, tensor_01_3_improving_model
 from tensor_01_regression import tensor_01_4_process_model, tensor_01_5_larger_example
+from tensor_01_regression import tensor_01_6_exercise
+# Import script of tensor part 02
+from tensor_02_classification import tensor_02_0_beginning
 
 
 def main():
@@ -28,7 +31,11 @@ def main():
     # tensor_01_2_visualizing.run()
     # tensor_01_3_improving_model.run()
     # tensor_01_4_process_model.run()
-    tensor_01_5_larger_example.run()
+    # tensor_01_5_larger_example.run()
+    # tensor_01_6_exercise.run()
+
+    # script for tensor part 02 of curriculum
+    tensor_02_0_beginning.run()
 
 
 if __name__ == "__main__":

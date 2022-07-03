@@ -67,7 +67,7 @@ def run():
     # Calculate the mean absolute error
     # mae_var = tf.metrics.mean_absolute_error(y_true=y_test,
     #                                          y_pred=y_preds)
-    # print(f"MAE:{mae}")
+    # print(f"MAE:{mae_var}")
     # Check the test label tensor values
     # print(f"y_test:{y_test}")
     # Check the prediction tensor values (notice the extra square brackets)
@@ -199,5 +199,3 @@ def run():
     # Convert lists to pandas DataFrame
     final_results = pd.DataFrame(model_results, columns=["model", "mae", "mse"])
     print(final_results)
-
-

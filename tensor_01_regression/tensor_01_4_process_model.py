@@ -37,8 +37,8 @@ def run():
 
     # Compile the model
     model_2.compile(loss=tf.keras.losses.mae,
-                           optimizer=tf.keras.optimizers.SGD(),
-                           metrics=['mae'])
+                    optimizer=tf.keras.optimizers.SGD(),
+                    metrics=['mae'])
 
     # Fit the model
     model_2.fit(tf.expand_dims(X_train, axis=-1), y_train, epochs=100, verbose=0)
