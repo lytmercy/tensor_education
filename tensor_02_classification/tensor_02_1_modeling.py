@@ -48,7 +48,6 @@ def plot_decision_boundary(model, X, y):
     plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdYlBu)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
-    plt.show()
 
 
 def run():
@@ -133,6 +132,7 @@ def run():
 
     # Check out the predictions our model is making
     # plot_decision_boundary(model_3, X, y)
+    # plt.show()
 
     # === Build regression model ===
     tf.random.set_seed(42)
