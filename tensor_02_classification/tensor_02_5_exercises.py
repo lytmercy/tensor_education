@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from tensor_02_classification.tensor_02_2_non_linearity import plot_decision_boundary
 # Import function for visualize image and predictions from tensor_02_4_larger_example
 from tensor_02_classification.tensor_02_4_larger_example import plot_random_image
+# Import function for visualize prettier confusion matrix from tensor_02_4_larger_example
+from tensor_02_classification.tensor_02_4_larger_example import make_confusion_matrix
 # Import function for creating & compile multiclass model from tensor_02_4_larger_example
 from tensor_02_classification.tensor_02_4_larger_example import make_multiclass_model, compile_multiclass_model
 
@@ -31,6 +33,10 @@ def plotting_multiply_random_images(model, images, true_labels, classes, number_
         ax = plt.subplot(2, 2, i + 1)
         plot_random_image(model, images, true_labels, classes)
         plt.axis(False)
+
+
+def own_tf_softmax(x):
+    return tf.exp(x) / tf.reduce_sum(tf.exp(x), axis=-1, keepdims=True)
 
 
 def run():
@@ -109,7 +115,7 @@ def run():
 
     '''Exercise - 4'''
 
-    # === Create function for visualize multiple image predictions on above ^ ===
+    # === Creating a function to visualise multiple image predictions on above ^ ===
 
     # Get data
     (X_train, y_train), (X_test, y_test) = fashion_mnist.load_data()
@@ -140,6 +146,60 @@ def run():
     # plotting_multiply_random_images(multi_model, X_test, y_test, class_names, 4)
     # plt.show()
 
+    '''Exercise - 5'''
+
+    # === Recreating `softmax` function on above ^ ===
+
+    # # Create data
+    # inputs = tf.random.normal(shape=(25, 10))
+    # # Use function
+    # outputs = own_tf_softmax(inputs)
+    # real_outputs = tf.keras.activations.softmax(inputs)
+    # # Printing outputs
+    # # print(outputs)
+    # print(tf.reduce_sum(outputs[0, :]))
+    # # Printing real outputs from tf.keras.activations.softmax() function
+    # # print(real_outputs)
+    # print(tf.reduce_sum(real_outputs[0, :]))
     #
+    # # Checking the sums of both above softmax function equality
+    # sums_equal = (tf.reduce_sum(outputs[0, :]) == tf.reduce_sum(real_outputs[0, :])).__bool__()
+    # print(f"Sum`s equal = {sums_equal}")
+
+    '''Exercise - 6'''
+
+    # === Build new model ===
+    accuracy_model = tf.keras.Sequential([
+        tf.keras.layers.Flatten(input_shape=(28, 28)),
+        tf.keras.layers.Dense(5, activation='relu'),
+        tf.keras.layers.Dense(5, activation='relu'),
+        tf.keras.layers.Dense(10, activation='softmax')
+    ])
+    # accuracy_model = make_multiclass_model()
+    compile_multiclass_model(accuracy_model, learn_rate=0.001)
+    accuracy_history = accuracy_model.fit(X_train, y_train, epochs=20, validation_data=(X_test, y_test))
+
+    # Plot loss curves
+    # pd.DataFrame(accuracy_history.history).plot(title="Loss Curves")
+    # plt.show()
+
+    # Evaluate model
+    # loss, accuracy = accuracy_model.evaluate(X_test)
+    # print(f"Accuracy = {accuracy*100}%")
+
+    # Summary
+    accuracy_model.summary()
+
+    # Make predictions
+    y_probs = accuracy_model.predict(X_test)
+    # Convert all the predictions from probabilities to label
+    y_preds = y_probs.argmax(axis=1)
+    # Plot a confusion matrix
+    make_confusion_matrix(y_true=y_test,
+                          y_pred=y_preds,
+                          classes=class_names,
+                          figsize=(15, 15),
+                          text_size=10)
+    plt.show()
 
 

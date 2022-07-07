@@ -117,7 +117,7 @@ def plot_random_image(model, images, true_labels, classes):
     else:
         color = 'red'
 
-    # Add xlabel information (prediction/true label)
+    # Add title (xlabel) information (prediction/true label)
     plt.title("Pred: {} {:2.0f}% (True: {})".format(pred_label,
                                                     100*tf.reduce_max(pred_probs),
                                                     true_label),
@@ -151,7 +151,7 @@ def run():
     class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
                    'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
 
-    # How many classes are there (this will be ouu output shape)?
+    # How many classes are there (this will be out output shape)?
     # print(len(class_names))
 
     # Plot on example image and its label
@@ -171,10 +171,10 @@ def run():
     # plt.show()
 
     # === Build new model_11 ===
-    tf.random.set_seed(42)
-
-    model_11 = make_multiclass_model()
-    compile_multiclass_model(model_11)
+    # tf.random.set_seed(42)
+    #
+    # model_11 = make_multiclass_model()
+    # compile_multiclass_model(model_11)
 
     # non_norm_history = model_11.fit(train_data,
     #                                 train_labels,
@@ -234,7 +234,7 @@ def run():
     # plt.show()
 
     # === Build new model_14 ===
-    tf.random.set_seed(42)
+    # tf.random.set_seed(42)
 
     model_14 = make_multiclass_model()
     compile_multiclass_model(model_14)
@@ -266,21 +266,21 @@ def run():
     #                        y_pred=y_preds))
 
     # Make a prettier confusion matrix
-    # make_confusion_matrix(y_true=test_labels,
-    #                       y_pred=y_preds,
-    #                       classes=class_names,
-    #                       figsize=(15, 15),
-    #                       text_size=10)
-    # plt.show()
+    make_confusion_matrix(y_true=test_labels,
+                          y_pred=y_preds,
+                          classes=class_names,
+                          figsize=(15, 15),
+                          text_size=10)
+    plt.show()
 
     # Create a function for plotting a random image along with its prediction
 
     # Check out a random image as well as its prediction
-    plot_random_image(model=model_14,
-                      images=test_data,
-                      true_labels=test_labels,
-                      classes=class_names)
-    plt.show()
+    # plot_random_image(model=model_14,
+    #                   images=test_data,
+    #                   true_labels=test_labels,
+    #                   classes=class_names)
+    # plt.show()
 
     '''What patterns is our model learning?'''
 
