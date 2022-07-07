@@ -41,7 +41,8 @@ def main():
     # tensor_02_1_modeling.run()
     # tensor_02_2_non_linearity.run()
     # tensor_02_3_eval_and_improve.run()
-    tensor_02_4_larger_example.run()
+    # tensor_02_4_larger_example.run()
+    tensor_02_5_exercises.run()
 
 
 if __name__ == "__main__":
