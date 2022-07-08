@@ -12,6 +12,9 @@ from tensor_01_regression import tensor_01_6_exercises
 from tensor_02_classification import tensor_02_0_beginning, tensor_02_1_modeling
 from tensor_02_classification import tensor_02_2_non_linearity, tensor_02_3_eval_and_improve
 from tensor_02_classification import tensor_02_4_larger_example, tensor_02_5_exercises
+# Import script of tensor part 03
+from tensor_03_computer_vision import tensor_03_0_beginning, tensor_03_1_binary_classification
+from tensor_03_computer_vision import tensor_03_2_multi_class_classification, tensor_03_3_exercises
 
 
 def main():
@@ -42,7 +45,13 @@ def main():
     # tensor_02_2_non_linearity.run()
     # tensor_02_3_eval_and_improve.run()
     # tensor_02_4_larger_example.run()
-    tensor_02_5_exercises.run()
+    # tensor_02_5_exercises.run()
+
+    # script for tensor part 03 of computer vision classification
+    tensor_03_0_beginning.run()
+    # tensor_03_1_binary_classification.run()
+    # tensor_03_2_multi_class_classification.run()
+    # tensor_03_3_exercises.run()
 
 
 if __name__ == "__main__":

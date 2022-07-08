@@ -24,6 +24,7 @@ def plotting_multiply_random_images(model, images, true_labels, classes, number_
     :param images: a set of random images (in tensor form).
     :param true_labels: array of ground truth labels for images.
     :param classes: array of class names for images.
+    :param number_images: a number of images that will be shown.
     :return: A plot of multiply random image from `images` with a predicted class label from `model`
     as well as the truth class label from `true_labels`.
     """
@@ -37,6 +38,45 @@ def plotting_multiply_random_images(model, images, true_labels, classes, number_
 
 def own_tf_softmax(x):
     return tf.exp(x) / tf.reduce_sum(tf.exp(x), axis=-1, keepdims=True)
+
+
+def certain_class_images(model, test_images, true_labels, classes, number_images, certain_class):
+    """
+    Picks multiply random images of a certain class and try to predict them labels.
+    Plotting all to predict and true labels.
+
+    :param model: a trained model (trained to data similar to what's in images).
+    :param test_images: a set of random images of test dataset (in tensor form).
+    :param true_labels: array of ground truth test labels for test_images.
+    :param classes: array of class names for test_images.
+    :param number_images: a number of images that will be shown.
+    :param certain_class: a certain class that will be checked when the image would be shown (in string form)
+    :return: A plot of multiply random image of a certain class with predicted and true labels.
+    """
+    plt.figure(figsize=(8, 8))
+    for i in range(number_images):
+        ax = plt.subplot(2, 2, i + 1)
+        while True:
+            rand_index = random.choice(range(len(test_images)-1))
+            if str.__contains__(classes[true_labels[rand_index]], certain_class):
+                y_probs = model.predict(test_images[rand_index])
+                y_preds = y_probs.argmax()
+                print(tf.reduce_max(y_probs))
+                true_label = classes[true_labels[rand_index]]
+                pred_label = classes[y_preds]
+
+                if true_label == pred_label:
+                    color = 'green'
+                else:
+                    color = 'red'
+
+                plt.imshow(test_images[rand_index], cmap=plt.cm.binary)
+                plt.title("Pred: {} {:2.0f}% (True: {})".format(pred_label,
+                                                                100 * tf.reduce_max(y_probs),
+                                                                true_label),
+                          color=color)
+                plt.axis(False)
+                break
 
 
 def run():
@@ -171,8 +211,10 @@ def run():
     # === Build new model ===
     accuracy_model = tf.keras.Sequential([
         tf.keras.layers.Flatten(input_shape=(28, 28)),
-        tf.keras.layers.Dense(5, activation='relu'),
-        tf.keras.layers.Dense(5, activation='relu'),
+        tf.keras.layers.Dense(55, activation='relu'),
+        tf.keras.layers.Dense(55, activation='relu'),
+        tf.keras.layers.Dense(50, activation='relu'),
+        tf.keras.layers.Dense(50, activation='relu'),
         tf.keras.layers.Dense(10, activation='softmax')
     ])
     # accuracy_model = make_multiclass_model()
@@ -188,18 +230,24 @@ def run():
     # print(f"Accuracy = {accuracy*100}%")
 
     # Summary
-    accuracy_model.summary()
+    # accuracy_model.summary()
 
     # Make predictions
     y_probs = accuracy_model.predict(X_test)
     # Convert all the predictions from probabilities to label
     y_preds = y_probs.argmax(axis=1)
     # Plot a confusion matrix
-    make_confusion_matrix(y_true=y_test,
-                          y_pred=y_preds,
-                          classes=class_names,
-                          figsize=(15, 15),
-                          text_size=10)
+    # make_confusion_matrix(y_true=y_test,
+    #                       y_pred=y_preds,
+    #                       classes=class_names,
+    #                       figsize=(15, 15),
+    #                       text_size=10)
+    # plt.show()
+
+    '''Exercise - 7'''
+
+    # === Creating the function to show several images of a certain class and their prediction ===
+
+    # Use function
+    certain_class_images(accuracy_model, X_test, y_test, class_names, 4, 'T-shirt')
     plt.show()
-
-
