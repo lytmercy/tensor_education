@@ -233,9 +233,9 @@ def run():
     # accuracy_model.summary()
 
     # Make predictions
-    y_probs = accuracy_model.predict(X_test)
+    # y_probs = accuracy_model.predict(X_test)
     # Convert all the predictions from probabilities to label
-    y_preds = y_probs.argmax(axis=1)
+    # y_preds = y_probs.argmax(axis=1)
     # Plot a confusion matrix
     # make_confusion_matrix(y_true=y_test,
     #                       y_pred=y_preds,
