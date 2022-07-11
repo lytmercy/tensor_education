@@ -37,7 +37,7 @@ def run():
 
     '''Get the data'''
     # Download zip file of pizza_steak images
-    # os.system("wget https://storage.googleapis.com/ztm_tf_course/food_vision/pizza_steak.zip")
+    # wget.download("https://storage.googleapis.com/ztm_tf_course/food_vision/pizza_steak.zip")
 
     # Unzip the downloaded file
     # zip_ref = zipfile.ZipFile('pizza_steak.zip', 'r')
