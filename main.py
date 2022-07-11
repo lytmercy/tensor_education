@@ -50,8 +50,8 @@ def main():
     # script for tensor part 03 of computer vision classification
     # tensor_03_0_beginning.run()
     # tensor_03_1_binary_classification.run()
-    tensor_03_2_multi_class_classification.run()
-    # tensor_03_3_exercises.run()
+    # tensor_03_2_multi_class_classification.run()
+    tensor_03_3_exercises.run()
 
 
 if __name__ == "__main__":
