@@ -92,7 +92,7 @@ def load_and_prep_image(filename, img_shape=224):
     return img
 
 
-def pred_and_plot(model, filename, class_names):
+def pred_and_plot(model, filename, class_names, img_shape=224):
     """
     Imports an image located at filename, makes a prediction on it with
     a trained model and plots the image with the predicted class as the title.
@@ -100,10 +100,11 @@ def pred_and_plot(model, filename, class_names):
     :param model: pretrained model
     :param filename: image file which be plotted
     :param class_names: array with class names which `model` will be predicted
+    :param img_shape: number of size image shape for loading.
     :return: None
     """
     # Import the target image and preprocess it
-    img = load_and_prep_image(filename)
+    img = load_and_prep_image(filename, img_shape)
 
     # Make a prediction
     pred = model.predict(tf.expand_dims(img, axis=0))
