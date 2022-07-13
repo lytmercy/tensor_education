@@ -72,7 +72,7 @@ def run():
     # Turn it into batches
     train_data = train_datagen.flow_from_directory(train_dir,
                                                    target_size=(1080, 1080),
-                                                   batch_size=2,
+                                                   batch_size=1,
                                                    class_mode='binary')
 
     test_data = test_datagen.flow_from_directory(test_dir,
@@ -96,7 +96,7 @@ def run():
         Conv2D(10, 3, activation='relu'),
         Conv2D(10, 3, activation='relu'),
         Conv2D(10, 3, activation='relu'),
-        MaxPool2D(pool_size=2),
+        MaxPool2D(pool_size=3),
         Conv2D(5, 2, activation='relu'),
         Conv2D(5, 2, activation='relu'),
         MaxPool2D(pool_size=2),
@@ -140,21 +140,21 @@ def run():
     class_names = np.array(sorted([item.name for item in data_dir.glob('*')]))
     # print(class_names)
 
-    train_datagen = ImageDataGenerator(rescale=1/255.,
-                                       rotation_range=20,
-                                       width_shift_range=0.2,
-                                       height_shift_range=0.2,
-                                       zoom_range=0.2,
-                                       horizontal_flip=True)
+    # train_datagen = ImageDataGenerator(rescale=1/255.,
+    #                                    rotation_range=20,
+    #                                    width_shift_range=0.2,
+    #                                    height_shift_range=0.2,
+    #                                    zoom_range=0.2,
+    #                                    horizontal_flip=True)
 
     # Turn image into batches
     train_data = train_datagen.flow_from_directory(train_dir,
-                                                   target_size=(1080, 1080),
-                                                   batch_size=2,
+                                                   target_size=(512, 512),
+                                                   batch_size=5,
                                                    class_mode='categorical')
     test_data = test_datagen.flow_from_directory(test_dir,
-                                                 target_size=(1080, 1080),
-                                                 batch_size=2,
+                                                 target_size=(512, 512),
+                                                 batch_size=5,
                                                  class_mode='categorical')
 
     # Get a sample of the training data batch
@@ -166,22 +166,29 @@ def run():
 
     # === Build multi_class_model ===
     multi_class_model = Sequential([
-        Conv2D(10, 3, activation='relu', input_shape=(1080, 1080, 3)),
-        Conv2D(10, 3, activation='relu'),
-        MaxPool2D(pool_size=4),
-        Conv2D(10, 3, activation='relu'),
-        Conv2D(10, 3, activation='relu'),
-        Conv2D(10, 3, activation='relu'),
-        MaxPool2D(pool_size=3),
-        Conv2D(10, 3, activation='relu'),
-        Conv2D(10, 3, activation='relu'),
+        Conv2D(15, 3, activation='relu', input_shape=(512, 512, 3)),
+        Conv2D(15, 3, activation='relu'),
+        Conv2D(15, 3, activation='relu'),
+        MaxPool2D(),
+        Conv2D(15, 3, activation='relu'),
+        Conv2D(15, 2, activation='relu'),
+        Conv2D(15, 2, activation='relu'),
+        Conv2D(15, 3, activation='relu'),
+        MaxPool2D(),
+        Conv2D(15, 3, activation='relu'),
+        Conv2D(10, 2, activation='relu'),
+        Conv2D(10, 2, activation='relu'),
+        Conv2D(15, 3, activation='relu'),
+        MaxPool2D(),
+        Conv2D(15, 3, activation='relu'),
+        Conv2D(15, 3, activation='relu'),
         MaxPool2D(),
         Flatten(),
         Dense(10, activation='softmax')
     ])
 
     multi_class_model.compile(loss='categorical_crossentropy',
-                              optimizer=Adam(learning_rate=0.022),
+                              optimizer=Adam(learning_rate=0.002),
                               metrics=['accuracy'])
 
     # Create the learning rate callback
@@ -206,4 +213,4 @@ def run():
     plt.show()
 
     # Print model summary
-    multi_class_model.summary()
+    # multi_class_model.summary()

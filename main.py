@@ -15,6 +15,8 @@ from tensor_02_classification import tensor_02_4_larger_example, tensor_02_5_exe
 # Import script of tensor part 03
 from tensor_03_computer_vision import tensor_03_0_beginning, tensor_03_1_binary_classification
 from tensor_03_computer_vision import tensor_03_2_multi_class_classification, tensor_03_3_exercises
+# Import script of tensor part 04
+from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_0_beginning
 
 
 def main():
@@ -51,7 +53,10 @@ def main():
     # tensor_03_0_beginning.run()
     # tensor_03_1_binary_classification.run()
     # tensor_03_2_multi_class_classification.run()
-    tensor_03_3_exercises.run()
+    # tensor_03_3_exercises.run()
+
+    # script for tensor part 04 of transfer learning part 1: Feature Extraction
+    tensor_04_p1_0_beginning.run()
 
 
 if __name__ == "__main__":
