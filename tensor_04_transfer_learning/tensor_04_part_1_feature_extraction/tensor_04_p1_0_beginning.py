@@ -68,7 +68,3 @@ def run():
     '''Setting up callbacks (things to run whilst our model trains)'''
 
     # === Creating function for TensorBoard callback above ^ ===
-
-    '''Creating models using TensorFlow Hub'''
-
-    #

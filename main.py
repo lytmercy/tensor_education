@@ -17,6 +17,8 @@ from tensor_03_computer_vision import tensor_03_0_beginning, tensor_03_1_binary_
 from tensor_03_computer_vision import tensor_03_2_multi_class_classification, tensor_03_3_exercises
 # Import script of tensor part 04
 from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_0_beginning
+from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_1_tensorhub
+from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_2_exercise
 
 
 def main():
@@ -56,7 +58,8 @@ def main():
     # tensor_03_3_exercises.run()
 
     # script for tensor part 04 of transfer learning part 1: Feature Extraction
-    tensor_04_p1_0_beginning.run()
+    # tensor_04_p1_0_beginning.run()
+    tensor_04_p1_1_tensorhub.run()
 
 
 if __name__ == "__main__":
