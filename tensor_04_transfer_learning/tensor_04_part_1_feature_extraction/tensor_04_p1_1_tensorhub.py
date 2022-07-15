@@ -67,7 +67,7 @@ def run():
 
     '''Creating model using TensorFlow Hub'''
 
-    # Restnet 50 V2 feature vector
+    # ResNet 50 V2 feature vector
     resnet_url = "https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/5"
 
     # Original: EfficientNetB0 feature vector (version 1)
