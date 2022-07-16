@@ -18,9 +18,11 @@ from tensor_03_computer_vision import tensor_03_2_multi_class_classification, te
 # Import script of tensor 04 part 1
 from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_0_beginning
 from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_1_tensorhub
-from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_2_exercise
+from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tensor_04_p1_2_exercises
 # Import script of tensor 04 part 2
 from tensor_04_transfer_learning.tensor_04_part_2_fine_tuning import tensor_04_p2_0_beginning
+from tensor_04_transfer_learning.tensor_04_part_2_fine_tuning import tensor_04_p2_1_series_transfer_learning
+from tensor_04_transfer_learning.tensor_04_part_2_fine_tuning import tensor_04_p2_2_exercises
 
 
 def main():
@@ -62,10 +64,11 @@ def main():
     # script for tensor 04 of transfer learning part 1: Feature Extraction
     # tensor_04_p1_0_beginning.run()
     # tensor_04_p1_1_tensorhub.run()
-    tensor_04_p1_2_exercise.run()
+    # tensor_04_p1_2_exercise.run()
 
     # script for tensor 04 of transfer learning part 2: Fine-tuning
-    tensor_04_p2_0_beginning.run()
+    # tensor_04_p2_0_beginning.run()
+    tensor_04_p2_1_series_transfer_learning.run()
 
 
 if __name__ == "__main__":
