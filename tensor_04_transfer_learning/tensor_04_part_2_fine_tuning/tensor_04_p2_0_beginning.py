@@ -1,6 +1,7 @@
 import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Dense, Flatten, Input, Rescaling, GlobalAveragePooling2D, GlobalMaxPooling2D
+from keras.layers import Dense, Flatten, Input, Rescaling
+from keras.layers import GlobalAveragePooling2D, GlobalMaxPooling2D
 from keras.optimizers import Adam
 from keras import applications
 from keras import Model
@@ -9,7 +10,8 @@ import wget
 import matplotlib.pyplot as plt
 
 # Import helper functions
-from helper_functions import create_tensorboard_callback, plot_loss_curves, unzip_data, walk_through_dir
+from helper_functions import create_tensorboard_callback, plot_loss_curves
+from helper_functions import unzip_data, walk_through_dir
 
 
 # Define Global variable
