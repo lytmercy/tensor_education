@@ -137,41 +137,42 @@ def run():
     '''Model 1: Feature extraction transfer learning on 1% of the data with data augmentation'''
 
     # Setup input shape and base model, freezing the base model layers
-    # input_shape = (224, 224, 3)
-    # base_model = applications.EfficientNetB0(include_top=False)
-    # base_model.trainable = False
+    input_shape = (224, 224, 3)
+    base_model = applications.EfficientNetB0(include_top=False)
+    base_model.trainable = False
 
     # Create input layer
-    # inputs = Input(shape=input_shape, name='input_layer')
+    inputs = Input(shape=input_shape, name='input_layer')
 
     # Add in data augmentation Sequential model as a layer
-    # x = data_augmentation(inputs)
+    x = data_augmentation(inputs)
 
     # Give base_model inputs (after augmentation) and don't train it
-    # x = base_model(x, training=False)
+    x = base_model(x, training=False)
 
     # Pool output features of base model
-    # x = GlobalAveragePooling2D(name='global_average_pooling_layer')(x)
+    x = GlobalAveragePooling2D(name='global_average_pooling_layer')(x)
 
     # Put a dense layer on as the output
-    # outputs = Dense(10, activation='softmax', name='output_layer')(x)
+    outputs = Dense(10, activation='softmax', name='output_layer')(x)
 
     # Make a model with inputs and outputs
-    # model_1 = Model(inputs, outputs)
+    model_1 = Model(inputs, outputs)
 
     # Compile the model
-    # model_1.compile(loss='categorical_crossentropy',
-    #                 optimizer=Adam(),
-    #                 metrics=['accuracy'])
+    model_1.compile(loss='categorical_crossentropy',
+                    optimizer=Adam(),
+                    metrics=['accuracy'])
 
     # Fit the model
-    # history_1_percent = model_1.fit(train_data_1_percent,
-    #                                 epochs=5,
-    #                                 steps_per_epoch=len(train_data_1_percent),
-    #                                 validation_data=test_data,
-    #                                 validation_steps=int(0.25 * len(test_data)),  # validation for less steps
-    #                                 # Track model training logs
-    #                                 callbacks=[create_tensorboard_callback('transfer_learning', '1_percent_data_aug')])
+    print("Fitting Model 1")
+    history_1_percent = model_1.fit(train_data_1_percent,
+                                    epochs=5,
+                                    steps_per_epoch=len(train_data_1_percent),
+                                    validation_data=test_data,
+                                    validation_steps=int(0.25 * len(test_data)),  # validation for less steps
+                                    # Track model training logs
+                                    callbacks=[create_tensorboard_callback('transfer_learning', '1_percent_data_aug')])
 
     # Check out model summary
     # model_1.summary()
@@ -201,7 +202,7 @@ def run():
                                              label_mode='categorical',
                                              image_size=IMG_SIZE)
 
-    # Setup the input shape to our model
+    # Setup input shape to our model
     input_shape = (224, 224, 3)
 
     # Create a frozen base model
@@ -238,6 +239,7 @@ def run():
                                           verbose=1)
 
     # Fit the model saving checkpoints every epoch
+    print("Fitting Model 2")
     initial_epochs = 5
     history_10_percent_data_aug = model_2.fit(train_data_10_percent,
                                               epochs=initial_epochs,
@@ -257,7 +259,7 @@ def run():
     # plt.show()
 
     # Load in saved model weights and evaluate model
-    # model_2.load_weights(checkpoint_path)
+    model_2.load_weights(checkpoint_path)
     # loaded_weights_model_results = model_2.evaluate(test_data)
 
     # If the results from our native model and the loaded wights are the same, this should output True
@@ -272,21 +274,21 @@ def run():
     '''Model 3: Fine-tuning an existing model on 10% of the data'''
 
     # Layers in loaded model
-    print(model_2.layers)
+    # print(model_2.layers)
 
-    for layer in model_2.layers:
-        print(layer.trainable)
+    # for layer in model_2.layers:
+    #     print(layer.trainable)
 
-    model_2.summary()
+    # model_2.summary()
 
     # How many layers are trainable in our base model?
-    print(len(model_2.layers[2].trainable_variables))  # layer at index 2 is the EfficientNetB0 layer (the base model)
+    # print(len(model_2.layers[2].trainable_variables))  # layer at index 2 is the EfficientNetB0 layer (the base model)
 
-    print(len(base_model.trainable_variables))
+    # print(len(base_model.trainable_variables))
 
     # Check which layers are tuneable (trainable)
-    for layer_number, layer in enumerate(base_model.layers):
-        print(layer_number, layer.name, layer.trainable)
+    # for layer_number, layer in enumerate(base_model.layers):
+    #     print(layer_number, layer.name, layer.trainable)
 
     base_model.trainable = True
 
@@ -300,15 +302,16 @@ def run():
                     metrics=['accuracy'])
 
     # Check which layers are tuneable (trainable)
-    for layer_number, layer in enumerate(base_model.layers):
-        print(layer_number, layer.name, layer.trainable)
+    # for layer_number, layer in enumerate(base_model.layers):
+    #     print(layer_number, layer.name, layer.trainable)
 
-    print(len(model_2.trainable_variables))
+    # print(len(model_2.trainable_variables))
 
     # Fine tune for another 5 epochs
     fine_tune_epochs = initial_epochs + 5
 
     # Refit the model (same as model_2 except with more trainable layers)
+    print("Fitting Model 3")
     history_fine_10_percent_data_aug = model_2.fit(train_data_10_percent,
                                                    epochs=fine_tune_epochs,
                                                    validation_data=test_data,
@@ -318,12 +321,93 @@ def run():
                                                                                           '10_percent_fine_tune_last_10')])
 
     # Evaluate the model on the test data
-    results_fine_tune_10_percent = model_2.evaluate(test_data)
+    # results_fine_tune_10_percent = model_2.evaluate(test_data)
 
     # === Create function for compare histories above ^ ===
 
     # Use function
+    # compare_histories(original_history=history_10_percent_data_aug,
+    #                   new_history=history_fine_10_percent_data_aug,
+    #                   initial_epochs=5)
+    # plt.show()
+
+    '''Model 4: Fine-tuning an existing model all of the data'''
+
+    # Setup data directories
+    train_dir = 'datasets\\10_food_classes_all_data\\train\\'
+    test_dir = 'datasets\\10_food_classes_all_data\\test\\'
+
+    # How many images are we working with now?
+    walk_through_dir('datasets\\10_food_classes_all_data')
+
+    # Setup data inputs
+    train_data_10_classes_full = image_dataset_from_directory(train_dir,
+                                                              label_mode='categorical',
+                                                              image_size=IMG_SIZE)
+
+    # Note: this is the same test dataset we've been using for the previous modelling experiments
+    test_data = image_dataset_from_directory(test_dir,
+                                             label_mode='categorical',
+                                             image_size=IMG_SIZE)
+
+    # Evaluate model (this is the fine-tuned 10 percent of data version)
+    # print(model_2.evaluate(test_data))
+
+    # print same values from `results_fine_tune_10_percent`
+    # print(results_fine_tune_10_percent)
+
+    # Load model from checkpoint, that way we can fine-tune from
+    # the same stage the 10 percent data model was fine-tuned from
+    model_2.load_weights(checkpoint_path)  # revert model back to saved weights
+
+    # After loading the weights, this should have gone down (no fine-tuning)
+    # print(model_2.evaluate(test_data))
+
+    # Check to see if the above two results are the same (they should be)
+    # print(results_10_percent_data_aug)
+
+    # Check which layers are tuneable in the whole model
+    # for layer_number, layer in enumerate(model_2.layers):
+    #     print(layer_number, layer.name, layer.trainable)
+
+    # Check which layers are tuneable in the base model
+    # for layer_number, layer in enumerate(base_model.layers):
+    #     print(layer_number, layer.name, layer.trainable)
+
+    # Compile
+    model_2.compile(loss='categorical_crossentropy',
+                    optimizer=Adam(0.0001),  # divide learning rate by 10 for fine-tuning
+                    metrics=['accuracy'])
+
+    # Continue to train and fine-tune the model to our data
+    print("Fitting Model 4")
+    fine_tune_epochs = initial_epochs + 5
+
+    history_fine_10_classes_full = model_2.fit(train_data_10_classes_full,
+                                               epochs=fine_tune_epochs,
+                                               initial_epoch=history_10_percent_data_aug.epoch[-1],
+                                               validation_data=test_data,
+                                               validation_steps=int(0.25 * len(test_data)),
+                                               callbacks=[create_tensorboard_callback('transfer_learning',
+                                                                                      'full_10_classes_fine_tune_last_10')])
+
+    # Evaluate on all the test data
+    results_fine_tune_full_data = model_2.evaluate(test_data)
+    print(results_fine_tune_full_data)
+
+    # How did fine-tuning go with more data?
     compare_histories(original_history=history_10_percent_data_aug,
-                      new_history=history_fine_10_percent_data_aug,
-                      initial_epochs=5)
-    plt.show()
+                      new_history=history_fine_10_classes_full,
+                      initial_epochs=initial_epochs)
+
+    '''Viewing our experiment data on TensorBoard'''
+
+    # View tensorboard logs of transfer learning modelling experiments (should be 4 models)
+    # Upload TensorBoard dev records
+    # tensorboard dev upload --logdir ./transfer_learning \
+    # --name "Transfer learning experiments" \
+    # --description "A series of different transfer learning experiments with varying amounts of data and fine-tuning" \
+    # --one_shot  # exits the uploader when upload has finished
+
+    # View previous experiments
+    # tensorboard dev list
