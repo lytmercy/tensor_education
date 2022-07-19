@@ -399,6 +399,7 @@ def run():
     compare_histories(original_history=history_10_percent_data_aug,
                       new_history=history_fine_10_classes_full,
                       initial_epochs=initial_epochs)
+    plt.show()
 
     '''Viewing our experiment data on TensorBoard'''
 

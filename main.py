@@ -68,7 +68,8 @@ def main():
 
     # script for tensor 04 of transfer learning part 2: Fine-tuning
     # tensor_04_p2_0_beginning.run()
-    tensor_04_p2_1_series_transfer_learning.run()
+    # tensor_04_p2_1_series_transfer_learning.run()
+    tensor_04_p2_2_exercises.run()
 
 
 if __name__ == "__main__":
