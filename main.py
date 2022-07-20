@@ -23,6 +23,10 @@ from tensor_04_transfer_learning.tensor_04_part_1_feature_extraction import tens
 from tensor_04_transfer_learning.tensor_04_part_2_fine_tuning import tensor_04_p2_0_beginning
 from tensor_04_transfer_learning.tensor_04_part_2_fine_tuning import tensor_04_p2_1_series_transfer_learning
 from tensor_04_transfer_learning.tensor_04_part_2_fine_tuning import tensor_04_p2_2_exercises
+# Import script of tensor 04 part 3
+from tensor_04_transfer_learning.tensor_04_part_3_scaling_up import tensor_04_p3_0_beginning
+from tensor_04_transfer_learning.tensor_04_part_3_scaling_up import tensor_04_p3_1_big_dog_model
+from tensor_04_transfer_learning.tensor_04_part_3_scaling_up import tensor_04_p3_2_exercises
 
 
 def main():
@@ -69,7 +73,12 @@ def main():
     # script for tensor 04 of transfer learning part 2: Fine-tuning
     # tensor_04_p2_0_beginning.run()
     # tensor_04_p2_1_series_transfer_learning.run()
-    tensor_04_p2_2_exercises.run()
+    # tensor_04_p2_2_exercises.run()
+
+    # script for tensor 04 of transfer learning part 3: Scaling up
+    tensor_04_p3_0_beginning.run()
+    # tensor_04_p3_1_big_dog_model.run()
+    # tensor_04_p3_2_exercises.run()
 
 
 if __name__ == "__main__":

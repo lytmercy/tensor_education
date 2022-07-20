@@ -15,10 +15,11 @@ import random
 import pathlib
 
 # Import helper functions
-from helper_functions import create_tensorboard_callback, plot_loss_curves, pred_and_plot
+from helper_functions import create_tensorboard_callback, plot_loss_curves, pred_and_plot, compare_histories
 
 # Define global variable
 IMG_SIZE = (224, 224)
+BATCH_SIZE = 32
 
 
 def visualize_and_pred(model, dataset, classes):
@@ -30,24 +31,30 @@ def visualize_and_pred(model, dataset, classes):
     :return: plot with one random image and his prediction as title (with ground truth)
     """
     # Get images and labels from dataset
-    images = list(dataset.unbatch().map(lambda x, y: x))
-    labels = list(dataset.unbatch().map(lambda x, y: y))
+    dataset_size = len(dataset)
+    batch_iter = dataset.__iter__()
 
     # Setup random integer
-    i = random.randint(0, len(images))
+    i_batch = random.randint(0, dataset_size)
+    i_array = random.randint(0, BATCH_SIZE)
 
-    print(images[i])
-    print(labels[i].numpy().argmax())
-    print(i)
+    image, label = None, None
+
+    for i in range(0, dataset_size-1):
+        if i == i_batch:
+            image, label = batch_iter.next()
+            break
+        else:
+            batch_iter.next()
 
     # Create predictions and targets
-    target_image = images[i].numpy()
+    target_image = image[i_array]
     pred_probs = model.predict(tf.expand_dims(target_image, axis=0))
     pred_label = classes[pred_probs.argmax()]
-    true_label = classes[labels[i].numpy().argmax()]
+    true_label = classes[label[i_array].numpy().argmax()]
 
     # Plot the target image
-    plt.imshow(target_image)
+    plt.imshow(target_image/255.)
 
     # Change the colour of the titles depending on if the is right or wrong
     if pred_label == true_label:
@@ -57,8 +64,8 @@ def visualize_and_pred(model, dataset, classes):
 
     # Add title (xlabel) information (prediction/true label)
     plt.title("Pred: {} {:2.0f}% (True: {})".format(pred_label,
-                                                   100*tf.reduce_max(pred_probs),
-                                                   true_label),
+                                                    100*tf.reduce_max(pred_probs),
+                                                    true_label),
               color=color)
 
 
@@ -137,9 +144,9 @@ def run():
                                           verbose=1)
 
     print("\n\nFitting Own Model 1")
-    initial_epoch = 5
+    epochs = 5
     # own_history = own_model_1.fit(train_data,
-    #                               epochs=initial_epoch,
+    #                               epochs=epochs,
     #                               validation_data=test_data,
     #                               validation_steps=int(0.3 * len(test_data)),
     #                               callbacks=[create_tensorboard_callback('tensorflow_hub',
@@ -147,8 +154,8 @@ def run():
     #                                          checkpoint_callback])
 
     # call function for visualize and pred
-    visualize_and_pred(own_model_1, train_data, class_name)
-    plt.show()
+    # visualize_and_pred(own_model_1, train_data, class_name)
+    # plt.show()
 
     '''Exercise - 2'''
 
@@ -182,17 +189,63 @@ def run():
                         metrics=['accuracy'])
 
     # print("\n\nFitting Own Model 2")
-    # own_feature_history = own_model_2.fit(train_10_percent_data,
-    #                                       epochs=initial_epoch + 5,
-    #                                       validation_data=test_data,
-    #                                       validation_steps=int(0.5 * len(test_data)),
-    #                                       callbacks=[create_tensorboard_callback('tensorflow_hub',
-    #                                                                             'ownbestnetV2'),
-    #                                                  checkpoint_callback])
+    initial_epoch = 10
+    own_feature_history = own_model_2.fit(train_10_percent_data,
+                                          epochs=initial_epoch,
+                                          validation_data=test_data,
+                                          validation_steps=int(0.25 * len(test_data)),
+                                          callbacks=[create_tensorboard_callback('tensorflow_hub',
+                                                                                'ownbestnetV2'),
+                                                     checkpoint_callback])
 
     '''Exercise - 3'''
 
+    feature_extract_model.trainable = True
 
+    # Freeze all layers except for the
+    for layer in feature_extract_model.layers[:-20]:
+        layer.trainable = False
 
+    # Recompile the model
+    own_model_2.compile(loss='categorical_crossentropy',
+                        optimizer=Adam(learning_rate=0.0001),
+                        metrics=['accuracy'])
 
+    fine_tune_epochs_1 = initial_epoch + 10
 
+    # Refit the model
+    history_fine_tune_20_layers = own_model_2.fit(train_10_percent_data,
+                                                  epochs=fine_tune_epochs_1,
+                                                  validation_data=test_data,
+                                                  initial_epoch=own_feature_history.epoch[-1],
+                                                  validation_steps=int(0.25 * len(test_data)),
+                                                  callbacks=[create_tensorboard_callback('tensorflow_hub',
+                                                                                          'ownbestnetV2_1'),
+                                                             checkpoint_callback])
+
+    '''Exercise - 4'''
+
+    feature_extract_model.trainable = True
+
+    for layer in feature_extract_model.layers[:-30]:
+        layer.trainable = False
+
+    own_model_2.compile(loss='categorical_crossentropy',
+                        optimizer=Adam(learning_rate=0.0001),
+                        metrics=['accuracy'])
+
+    fine_tune_epochs_2 = fine_tune_epochs_1 + 10
+
+    history_fine_tune_30_layers = own_model_2.fit(train_10_percent_data,
+                                                  epochs=fine_tune_epochs_2,
+                                                  validation_data=test_data,
+                                                  initial_epoch=history_fine_tune_20_layers.epoch[-1],
+                                                  validation_steps=int(0.25 * len(test_data)),
+                                                  callbacks=[create_tensorboard_callback('tensorflow_hub',
+                                                                                         'ownbestnetV2_2')])
+
+    compare_histories(own_feature_history, history_fine_tune_20_layers, initial_epochs=10)
+    plt.show()
+
+    compare_histories(history_fine_tune_20_layers, history_fine_tune_30_layers, initial_epochs=20)
+    plt.show()
