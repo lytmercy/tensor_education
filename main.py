@@ -76,8 +76,8 @@ def main():
     # tensor_04_p2_2_exercises.run()
 
     # script for tensor 04 of transfer learning part 3: Scaling up
-    tensor_04_p3_0_beginning.run()
-    # tensor_04_p3_1_big_dog_model.run()
+    # tensor_04_p3_0_beginning.run()
+    tensor_04_p3_1_big_dog_model.run()
     # tensor_04_p3_2_exercises.run()
 
 
