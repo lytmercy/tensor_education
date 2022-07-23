@@ -24,6 +24,35 @@ from helper_functions import create_tensorboard_callback, plot_loss_curves, comp
 from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_0_beginning import GettingData
 
 
+def create_model(num_classes):
+    # === Build dataaugmentation layer ===
+    data_augmentation = Sequential([
+        RandomFlip('horizontal'),  # randomly flip images on horizontal edge
+        RandomRotation(0.2),  # randomly rotate images by a specific amount
+        RandomHeight(0.2),  # randomly adjust the height of an image by a specific  amount
+        RandomWidth(0.2),  # randomly adjust the width of an image by a specific amount
+        RandomZoom(0.2),  # randomly zoom into an image
+        # Rescaling(1./255)  # keep for models like ResNet50V2, remove for EfficientNet
+    ], name='data_augmentation')
+
+    # === Build model ===
+    # Setup base model and freeze its layers (this will extract features)
+    base_model = EfficientNetB0(include_top=False)
+    base_model.trainable = False
+
+    # Setup model architecture with trainable top layers
+    inputs = Input(shape=(224, 224, 3), name='input_layer')  # shape of input image
+    x = data_augmentation(inputs)  # augment images (only happens during training)
+    x = base_model(x, training=False)  # put the base model in inference mode, so we can use it to
+                                       # extract features without updating the weights
+    x = GlobalAveragePooling2D(name='global_average_pooling')(x)  # pool the outputs of the base model
+    # same number of outputs as classes
+    outputs = Dense(num_classes, activation='softmax', name='output_layer')(x)
+    model = Model(inputs, outputs)
+
+    return model, base_model
+
+
 def compile_model(model, learn_rate=0.001):
     model.compile(loss='categorical_crossentropy',
                   optimizer=Adam(learning_rate=learn_rate),
@@ -135,6 +164,19 @@ def load_and_prep_image(filename, img_shape=224, scale=True):
         return img
 
 
+def make_pred_and_visualize(model, food_datasets, class_names):
+    for img in food_datasets:
+        img = load_and_prep_image(img, scale=False)
+        pred_prob = model.predict(tf.expand_dims(img, axis=0))
+        pred_class = class_names[pred_prob.argmax()]
+        # Plot the images with appropriate annotations
+        plt.figure()
+        plt.imshow(img/255.)
+        plt.title(f"pred: {pred_class}, prob: {pred_prob.max():.2f}")
+        plt.axis(False)
+        plt.show()
+
+
 def run():
     """04.p3.1 Big dog model with transfer learning"""
 
@@ -156,29 +198,10 @@ def run():
                                           # only keep the best model weights on file (delete the rest)
                                           save_best_only=True)
 
-    # Setup data augmentation
-    data_augmentation = Sequential([
-        RandomFlip('horizontal'),  # randomly flip images on horizontal edge
-        RandomRotation(0.2),  # randomly rotate images by a specific amount
-        RandomHeight(0.2),  # randomly adjust the height of an image by a specific  amount
-        RandomWidth(0.2),  # randomly adjust the width of an image by a specific amount
-        RandomZoom(0.2),  # randomly zoom into an image
-        # Rescaling(1./255)  # keep for models like ResNet50V2, remove for EfficientNet
-    ], name='data_augmentation')
+    # === Create function for building model above ===
 
-    # Setup base model and freeze its layers (this will extract features)
-    base_model = EfficientNetB0(include_top=False)
-    base_model.trainable = False
-
-    # Setup model architecture with trainable top layers
-    inputs = Input(shape=(224, 224, 3), name='input_layer')  # shape of input image
-    x = data_augmentation(inputs)  # augment images (only happens during training)
-    x = base_model(x, training=False)  # put the base model in inference mode, so we can use it to
-                                       # extract features without updating the weights
-    x = GlobalAveragePooling2D(name='global_average_pooling')(x)  # pool the outputs of the base model
-    # same number of outputs as classes
-    outputs = Dense(len(train_data_all_10_percent.class_names), activation='softmax', name='output_layer')(x)
-    model = Model(inputs, outputs)
+    # Use function
+    model, base_model = create_model(len(train_data_all_10_percent.class_names))
 
     # model.summary()
 
@@ -350,7 +373,7 @@ def run():
     # autolabel(scores, ax)
     # plt.show()
 
-    # Exercise: Visualize som of the most poor performing classes.
+    # Exercise: Visualize some of the most poor performing classes.
     # 8   bread_pudding  0.328358
     # 93          steak  0.323770
     # 82        ravioli  0.307692
@@ -451,13 +474,4 @@ def run():
     # print(custom_food_images)
 
     # Make predictions on custom food images
-    for img in custom_food_images:
-        img = load_and_prep_image(img, scale=False)  # load in target image and turn it into tensor
-        pred_prob = model.predict(tf.expand_dims(img, axis=0))  # make prediction on image with shape [None, 224, 224, 3]
-        pred_class = class_names[pred_prob.argmax()]  # find the predicted class label
-        # Plot the image with appropriate annotations
-        plt.figure()
-        plt.imshow(img/255.)  # imshow() requires float inputs to be normalized
-        plt.title(f"pred: {pred_class}, prob: {pred_prob.max():.2f}")
-        plt.axis(False)
-        plt.show()
+    make_pred_and_visualize(model, custom_food_images, class_names)

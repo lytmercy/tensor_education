@@ -23,6 +23,12 @@ class GettingData:
                                             image_size=(224, 224),
                                             shuffle=False)  # don't shuffle test data for prediction analysis
 
+    def get_class_names(self):
+        return image_dataset_from_directory(self.test_dir,
+                                            label_mode='categorical',
+                                            image_size=(224, 224),
+                                            shuffle=False).class_names
+
 
 def run():
     """04.p3.0 Beginning"""
