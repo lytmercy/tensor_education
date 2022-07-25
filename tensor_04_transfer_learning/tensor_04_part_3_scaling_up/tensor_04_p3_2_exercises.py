@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import random
 import os
 
-# Import helper function
+# Import helper functions
 from helper_functions import plot_loss_curves, compare_histories, load_and_prep_image
 
 # Import class for get class names
@@ -39,8 +39,7 @@ def training_model(model, train_dataset, test_dataset, train_epochs=10):
 def run():
     """04.p3.2 Exercises
 
-    1. Take 3 of your own photos of food and use the trained model to make predictions on them, share your predictions
-    with the other students in Discord and show off your Food Vision model 🍔👁.
+    1. Take 3 of your own photos of food and use the trained model to make predictions on them.
     2. Train a feature-extraction transfer learning model for 10 epochs on the same data and compare its performance
     versus a model which used feature extraction for 5 epochs and fine-tuning for 5 epochs (like we've used in this
     notebook). Which method is better?
