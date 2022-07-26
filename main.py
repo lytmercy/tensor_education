@@ -85,8 +85,8 @@ def main():
     # tensor_04_p3_2_exercises.run()
 
     # scripts of tensor 07 of milestone project_1: Food Vision
-    tensor_07_0_preprocess_data.run()
-    # tensor_07_1_modeling.run()
+    # tensor_07_0_preprocess_data.run()
+    tensor_07_1_modeling.run()
     # tensor_07_2_exercises.run()
 
 
