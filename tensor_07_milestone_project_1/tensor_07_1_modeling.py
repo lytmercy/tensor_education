@@ -4,7 +4,7 @@ from keras.layers import Input, Dense, GlobalAveragePooling2D, Activation, Resca
 from keras.optimizers import Adam
 from keras import Model
 from keras.models import clone_model, load_model
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 from keras import mixed_precision
 
 import numpy as np
@@ -91,93 +91,155 @@ def run():
     '''Fit the feature extraction model'''
 
     # Fit the model with callback
-    history_101_food_classes_feature_extract = model_07.fit(train_data,
-                                                            epochs=3,
-                                                            steps_per_epoch=len(train_data),
-                                                            validation_data=test_data,
-                                                            validation_steps=int(0.15 * len(test_data)),
-                                                            callbacks=[create_tensorboard_callback('training_logs',
-                                                                                                   'efficientnetb0_101_classes_all_data_feature_extract'),
-                                                                       model_checkpoint])
+    # history_101_food_classes_feature_extract = model_07.fit(train_data,
+    #                                                         epochs=3,
+    #                                                         steps_per_epoch=len(train_data),
+    #                                                         validation_data=test_data,
+    #                                                         validation_steps=int(0.15 * len(test_data)),
+    #                                                         callbacks=[create_tensorboard_callback('training_logs',
+    #                                                                                                'efficientnetb0_101_classes_all_data_feature_extract'),
+    #                                                                    model_checkpoint])
 
     # Evaluate model (unsaved version) on whole test dataset
-    results_feature_extract_model = model_07.evaluate(test_data)
-    print(results_feature_extract_model)
+    # results_feature_extract_model = model_07.evaluate(test_data)
+    # print(results_feature_extract_model)
 
     '''Load and evaluate checkpoint weights'''
 
     # Clone the model we created (this resets all weights)
-    cloned_model = clone_model(model_07)
-    cloned_model.summary()
+    # cloned_model = clone_model(model_07)
+    # cloned_model.summary()
 
     # Where are our checkpoints stored?
-    print(checkpoint_path)
+    # print(checkpoint_path)
 
     # Load checkpointed weights into cloned_model
-    cloned_model.load_weights(checkpoint_path)
+    # cloned_model.load_weights(checkpoint_path)
 
     # Compile cloned_model (with same parameters as original model)
-    cloned_model.compile(loss='sparse_categorical_crossentropy',
-                         optimizer=Adam(),
-                         metrics=['accuracy'])
+    # cloned_model.compile(loss='sparse_categorical_crossentropy',
+    #                      optimizer=Adam(),
+    #                      metrics=['accuracy'])
 
     # Evaluate cloned model with loaded weights (should be same score as trained model)
-    results_cloned_model_with_loaded_weights = cloned_model.evaluate(test_data)
+    # results_cloned_model_with_loaded_weights = cloned_model.evaluate(test_data)
+    # print(results_cloned_model_with_loaded_weights)
+    #
+    # print(results_feature_extract_model == results_cloned_model_with_loaded_weights)
+    # print(np.isclose(results_feature_extract_model, results_cloned_model_with_loaded_weights).all())
 
     # Loaded checkpoint weights should return very similar results to checkpoint weights prior to saving
     # assert np.isclose(results_feature_extract_model, results_cloned_model_with_loaded_weights).all()  # check if all elements in array are close
 
     # Check the layers in th base model and see what dtype policy they're using
-    for layer in cloned_model.layers[1].layers[:20]:  # check only the first 20 layers to save space
-        print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
+    # for layer in cloned_model.layers[1].layers[:20]:  # check only the first 20 layers to save space
+    #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
 
     '''Save the whole model to file'''
 
     # Save model locally (if you're using Google Colab, your saved model will Colab instance terminates)
-    save_dir = 'models\\07_efficientnetb0_feature_extract_model_mixed_precision\\'
-    model_07.save(save_dir)
+    # save_dir = 'models\\07_efficientnetb0_feature_extract_model_mixed_precision\\'
+    # model_07.save(save_dir)
 
     # Load model previously save above
-    loaded_saved_model = load_model(save_dir)
+    # loaded_saved_model = load_model(save_dir)
 
     # Check the layers in the base model and see what dtype policy they're using
-    for layer in loaded_saved_model.layers[1].layers[:20]:  # check only the first 20 layers to save output space
-        print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
+    # for layer in loaded_saved_model.layers[1].layers[:20]:  # check only the first 20 layers to save output space
+    #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
 
     # Check loaded model performance (this should be the same as results_feature_extract_model)
-    results_loaded_saved_model = loaded_saved_model.evaluate(test_data)
-    print(results_loaded_saved_model)
+    # results_loaded_saved_model = loaded_saved_model.evaluate(test_data)
+    # print(results_loaded_saved_model)
 
     # The loaded model's results should equal (or at least be very close) to the model's results prior to saving
     # Note: this will only work if you've instantiated results variables
-    assert np.isclose(results_feature_extract_model, results_loaded_saved_model).all()
+    # assert np.isclose(results_feature_extract_model, results_loaded_saved_model).all()
 
     '''Preparing our model's layers for fine-tuning'''
 
     # Download the saved model from Google Storage
-    wget.download('https://storage.googleapis.com/ztm_tf_course/food_vision/07_efficientnetb0_feature_extract_model_mixed_precision.zip')
+    # wget.download('https://storage.googleapis.com/ztm_tf_course/food_vision/07_efficientnetb0_feature_extract_model_mixed_precision.zip')
     # Unzip the SavedModel downloaded from Google Storage
 
     # Load and evaluate downloaded GS model
     loaded_gs_model = load_model('models\\downloaded_gs_model\\07_efficientnetb0_feature_extract_model_mixed_precision')
 
     # Get a summary of our downloaded model
-    loaded_gs_model.summary()
+    # loaded_gs_model.summary()
 
     # How does the loaded model perform?
-    results_loaded_gs_model = loaded_gs_model.evaluate(test_data)
+    # results_loaded_gs_model = loaded_gs_model.evaluate(test_data)
 
     # Are any of the layers in our model frozen?
     for layer in loaded_gs_model.layers:
         layer.trainable = True  # set all layers to trainable
-        print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)  # make sure loaded model is using mixed
+        # print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)  # make sure loaded model is using mixed
                                                                              # precisiion dtype_policy ("mixed_float16")
     # Check the layers in the base model and see what dtype policy they're using
-    for layer in loaded_gs_model.layers[1].layers[:20]:
-        print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
+    # for layer in loaded_gs_model.layers[1].layers[:20]:
+    #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
 
     '''A couple more callbacks'''
 
-    #
+    # Setup EarlyStopping callback to stop training if model's val_loss doesn't improve for 3 epochs
+    early_stopping = EarlyStopping(monitor='val_loss',  # watch the val loss metric
+                                   patience=3)  # if val loss decreases for 3 epoch in a row, stop training
 
+    # Create ModelCheckpoint callback to save best model during fine-tuning
+    checkpoint_path = 'checkpoints\\fine_tune_checkpoints\\'
+    model_checkpoint = ModelCheckpoint(checkpoint_path,
+                                       save_best_only=True,
+                                       monitor='val_loss')
 
+    # Creating Learning rate reduction callback
+    reduce_lr = ReduceLROnPlateau(monitor='val_loss',
+                                  factor=0.2,  # multiply the learning rate by 0.2 (reduce by 5x)
+                                  patience=2,
+                                  verbose=1,  # print out when learning rate goes down
+                                  min_lr=1e-7)
+
+    # Compile the model
+    loaded_gs_model.compile(loss='sparse_categorical_crossentropy',
+                            optimizer=Adam(0.0001),
+                            metrics=['accuracy'])
+
+    # Start to fine-tune (all layers)
+    history_101_food_classes_all_data_fine_tune = loaded_gs_model.fit(train_data,
+                                                                      epochs=100,
+                                                                      steps_per_epoch=len(train_data),
+                                                                      validation_data=test_data,
+                                                                      validation_steps=int(0.15 * len(test_data)),
+                                                                      callbacks=[create_tensorboard_callback('training_log',
+                                                                                                             'efficientb0_101_classes_all_data_fine_tuning'),  # track the model training logs
+                                                                                 model_checkpoint,  # save only the best model during training
+                                                                                 early_stopping,  # stop model after X epochs of no improvements
+                                                                                 reduce_lr])  # reduce the learning rate after x epochs of no improvements
+
+    # # Save model
+    loaded_gs_model.save('models\\loaded_gs_model\\')
+
+    # Evaluate mixed precision trained loaded model
+    results_loaded_gs_model_fine_tuned = loaded_gs_model.evaluate(test_data)
+    # print(results_loaded_gs_model_fine_tuned)
+
+    '''Download fine-tuned model from Google Storage'''
+
+    # Load in fine-tuned model from local storage and evaluate
+    loaded_fine_tuned_gs_model = load_model('models\\loaded_gs_model')
+
+    # Get a model summary (some model architecture as above)
+    # loaded_fine_tuned_gs_model.summary()
+
+    # Note: Even if you're loading in the model from Google Storage, you will still
+    # need to load the test_data variable for this cell to work.
+    results_loaded_fine_tuned_gs_model = loaded_fine_tuned_gs_model.evaluate(test_data)
+    print(results_loaded_fine_tuned_gs_model)
+
+    '''View training results on TensorBoard'''
+
+    # Run this script in console
+    # tensorboard dev upload --logdir ./training_logs \
+    # --name "Fine-tuning EfficientNetB0 on all Food101 Data" \
+    # --description "Training results for fine-tuning EfficientNetB0 on Food101 Data with learning rate 0.0001" \
+    # --one_shot

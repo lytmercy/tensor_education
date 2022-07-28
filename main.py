@@ -30,7 +30,7 @@ from tensor_04_transfer_learning.tensor_04_part_3_scaling_up import tensor_04_p3
 from tensor_04_transfer_learning.tensor_04_part_3_scaling_up import tensor_04_p3_2_exercises
 # Import scripts of tensor 07
 from tensor_07_milestone_project_1 import tensor_07_0_preprocess_data, tensor_07_1_modeling
-from tensor_07_milestone_project_1 import tensor_07_2_exercises
+from tensor_07_milestone_project_1 import tensor_07_3_exercises
 
 
 def main():
