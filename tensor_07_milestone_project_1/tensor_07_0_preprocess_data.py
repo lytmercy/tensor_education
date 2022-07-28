@@ -27,9 +27,9 @@ class Dataset:
                                                                     with_info=True,
                                                                     data_dir=self.load_dir)
 
-    def preprocess_dataset(self):
+    def preprocess_dataset(self, batch=32):
         self.train_data = self.train_data.map(preprocess_img, num_parallel_calls=tf.data.AUTOTUNE)
-        self.train_data = self.train_data.shuffle(buffer_size=1000).batch(batch_size=32).prefetch(buffer_size=tf.data.AUTOTUNE)
+        self.train_data = self.train_data.shuffle(buffer_size=1000).batch(batch_size=batch).prefetch(buffer_size=tf.data.AUTOTUNE)
 
         self.test_data = self.test_data.map(preprocess_img, num_parallel_calls=tf.data.AUTOTUNE)
         self.test_data = self.test_data.batch(32).prefetch(tf.data.AUTOTUNE)

@@ -8,11 +8,16 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 from keras import mixed_precision
 
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.metrics import classification_report
 
 # Import helper functions
-from helper_functions import create_tensorboard_callback
+from helper_functions import create_tensorboard_callback, make_confusion_matrix
 # Import function for getting data
 from tensor_07_milestone_project_1.tensor_07_0_preprocess_data import Dataset
+# Import function for autolabel (modified version of barchart_demo from matplotlib)
+from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_1_big_dog_model import autolabel
 
 INPUT_SHAPE = (224, 224, 3)
 
@@ -27,14 +32,14 @@ def run():
     # Load dataset
     dataset_instance.load_dataset()
     # Preprocess datasets
-    dataset_instance.preprocess_dataset()
+    dataset_instance.preprocess_dataset(batch=14)
 
     # Getting train & test data
     train_data = dataset_instance.train_data
     test_data = dataset_instance.test_data
 
     # Getting class names
-    class_names = dataset_instance.ds_info['label'].names
+    class_names = dataset_instance.ds_info.features['label'].names
 
     # Setup mixed precision policy
     # mixed_precision.set_global_policy(policy='mixed_float16')
@@ -57,7 +62,7 @@ def run():
     own_todo_model = Model(inputs, outputs)
 
     # Check the model summary
-    own_todo_model.summary()
+    # own_todo_model.summary()
 
     # Compile model
     own_todo_model.compile(loss='sparse_categorical_crossentropy',
@@ -85,47 +90,47 @@ def run():
     '''TODO: Fit the feature extraction model'''
 
     # Fit the feature extraction model for 3 epochs with tensorboard and model checkpoint callbacks
-    own_todo_history = own_todo_model.fit(train_data,
-                                          epochs=3,
-                                          steps_per_epoch=len(train_data),
-                                          validation_data=test_data,
-                                          validation_steps=int(.15 * len(test_data)),
-                                          callbacks=[create_tensorboard_callback('training_logs',
-                                                                                 'own_todo_feature_extract_model'),
-                                                     model_checkpoint])
+    # own_todo_history = own_todo_model.fit(train_data,
+    #                                       epochs=3,
+    #                                       steps_per_epoch=len(train_data),
+    #                                       validation_data=test_data,
+    #                                       validation_steps=int(.15 * len(test_data)),
+    #                                       callbacks=[create_tensorboard_callback('training_logs',
+    #                                                                              'own_todo_feature_extract_model'),
+    #                                                  model_checkpoint])
 
     # Evaluate model (unsaved version) on whole test dataset
-    results_own_todo_model = own_todo_model.evaluate(test_data)
+    # results_own_todo_model = own_todo_model.evaluate(test_data)
 
     '''TODO: Save the whole model to file'''
 
     # Save model locally
-    own_todo_model.save('models\\own_todo_feature_extract_model\\')
+    # own_todo_model.save('models\\own_todo_feature_extract_model\\')
 
     # Load model previously saved above
-    loaded_own_todo_model = load_model('models\\own_todo_feature_extract_model\\')
+    # loaded_own_todo_model = load_model('models\\own_todo_feature_extract_model')
 
     # Check the layers in the base model and see what dtype policy they're usnig
-    for layer in own_todo_model.layers[1].layers[:20]:
-        print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
+    # for layer in own_todo_model.layers[1].layers[:20]:
+    #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
 
     # Check loaded model performance (this should be same as results_feature extract_model)
-    results_loaded_own_todo_model = loaded_own_todo_model.evaluate(test_data)
-    print(results_loaded_own_todo_model)
+    # results_loaded_own_todo_model = loaded_own_todo_model.evaluate(test_data)
+    # print(results_loaded_own_todo_model)
 
-    assert np.isclose(results_own_todo_model, results_loaded_own_todo_model).all()
+    # assert np.isclose(results_own_todo_model, results_loaded_own_todo_model).all()
 
     '''TODO: Preparing model's layers for fine-tuning'''
 
     # Load and evaluate downloaded GS model
-    loaded_gs_model = load_model('models\\07_efficientnetb0_feature_extract_model_mixed_precision')
+    loaded_feature_extract_model = load_model('models\\own_todo_feature_extract_model')
 
     # How does the loaded model perform? (evaluate it on the test dataset)
-    results_loaded_gs_model = loaded_gs_model.evaluate(test_data)
+    # results_loaded_gs_model = loaded_feature_extract_model.evaluate(test_data)
     # print(results_loaded_gs_model)
 
     # Set all of the layers .trainable variable in the loaded model to True (so they're unfrozen)
-    loaded_gs_model.trainable = True
+    loaded_feature_extract_model.trainable = True
 
     # Check to see what dtype_policy of the layers in your loaded model are
     # for layer in loaded_gs_model.layers:
@@ -138,37 +143,36 @@ def run():
     checkpoint_path = 'checkpoints\\own_todo_model\\checkpoint.ckpt'
     model_checkpoint = ModelCheckpoint(checkpoint_path,
                                        save_best_only=True,
-                                       save_weights_only=True,
                                        verbose=1)
 
     # Compile the model ready for fine-tuning
     # Use the Adam optimizer with a 10x lower than default learning rate
-    loaded_gs_model.compile(loss='sparse_categorical_crossentropy',
-                            optimizer=Adam(learning_rate=0.0001),
-                            metrics=['accuracy'])
+    loaded_feature_extract_model.compile(loss='sparse_categorical_crossentropy',
+                                         optimizer=Adam(learning_rate=0.0001),
+                                         metrics=['accuracy'])
 
     # Start to fine-tune (all layers)
     # Use 100 epochs as the default
     # Validate on 15% of the test_data
     # Use the create_tensorboard_callback, ModelCheckpoint and EarlyStopping callbacks
-    loaded_gs_history = loaded_gs_model.fit(train_data,
-                                            epochs=100,
-                                            steps_per_epoch=len(train_data),
-                                            validation_data=test_data,
-                                            validation_steps=int(.15 * len(test_data)),
-                                            callbacks=[create_tensorboard_callback('training_log',
-                                                                                   'loaded_todo_gs_fine_tuning_model'),
-                                                       model_checkpoint,
-                                                       early_stopping])
+    loaded_gs_history = loaded_feature_extract_model.fit(train_data,
+                                                         epochs=100,
+                                                         steps_per_epoch=len(train_data),
+                                                         validation_data=test_data,
+                                                         validation_steps=int(.15 * len(test_data)),
+                                                         callbacks=[create_tensorboard_callback('training_log',
+                                                                                                'loaded_todo_gs_fine_tuning_model'),
+                                                                    model_checkpoint,
+                                                                    early_stopping])
 
     # Save model locally
-    loaded_gs_model.save('models\\loaded_todo_gs_fine_tuning_model\\')
+    loaded_feature_extract_model.save('models\\loaded_todo_fine_tuning_model\\')
 
     # Evaluate mixed precision trained fine-tuned model (this should beat DeepFood's 77.4% top-1 accuracy)
-    load_todo_gs_model = load_model('models\\loaded_todo_gs_fine_tuning_model')
+    loaded_todo_fine_tuning_model = load_model('models\\loaded_todo_fine_tuning_model')
 
-    results_loaded_todo_gs_model = load_todo_gs_model.evaluate(test_data)
-    print(results_loaded_todo_gs_model)
+    results_loaded_todo_gs_fine_tuning_model = loaded_todo_fine_tuning_model.evaluate(test_data)
+    print(results_loaded_todo_gs_fine_tuning_model)
 
     '''TODO: View training results on TensorBoard'''
 
@@ -176,9 +180,81 @@ def run():
     # tensorboard dev upload --logdir ./training_logs --name "Own Fine-tuning Model" --one_shot
 
     '''TODO: Evaluate your trained model'''
+    """
+    Some ideas you might want to go through:
 
-    #
+    1. Find the precision, recall and f1 scores for each class (all 101).
+    2. Build a confusion matrix for each of the classes.
+    3. Find your model's most wrong predictions (those with the highest prediction probability but the wrong prediction).
 
+    """
+    # Making prediction
+    pred_probs = loaded_todo_fine_tuning_model.predict(test_data, verbose=1)
+
+    # Get the class predictions of each label
+    pred_labels = pred_probs.argmax(axis=1)
+
+    y_labels = []
+    for images, labels in test_data.unbatch():
+        y_labels.append(labels.numpy().argmax())
+
+    # 1. Find precision, recall and f1 score
+
+    # Get a dictionary of the classification report
+    classification_report_dict = classification_report(y_labels, pred_labels, output_dict=True)
+
+    class_of_scores = {}
+
+    for k, v in classification_report_dict.items():
+        if k == 'accuracy':  # stop once we get to accuracy key
+            break
+        else:
+            class_of_scores[class_names[int(k)]] = {'precision': v['precision'],
+                                                    'recall': v['recall'],
+                                                    'f1-score': v['f1-score']}
+
+    # Turn class dictionary into dataframe for visualization
+    scores = pd.DataFrame({'class_name': list(class_of_scores.keys()),
+                           'precision': list(class_of_scores.values('precision')),
+                           'recall': list(class_of_scores.values('recall')),
+                           'f1-score': list(class_of_scores.values('f1-score'))}).sort_values('f1-score', ascending=False)
+
+    fig, ax = plt.subplots(figsize=(12, 25))
+    fig_scores = ax.barh(range(len(scores)), scores['f1-score'].values)
+    ax.set_yticks(range(len(scores)))
+    ax.set_yticklabels(list(scores['class_name']))
+    ax.set_xlabel('f1-scores')
+    ax.set_title("F1-Scores for 10 Different Classes")
+    ax.invert_yaxis()
+    autolabel(fig_scores, ax)
+    plt.show()
+
+    # 2. Make confusion matrix
+    make_confusion_matrix(y_true=y_labels,
+                          y_pred=pred_labels,
+                          classes=class_names,
+                          figsize=(100, 100),
+                          text_size=20,
+                          norm=False,
+                          savefig=True)
+
+    # 3. Find most wrong prediction
+    filepaths = []
+    for filepath in test_data.list_files('101_food_classes_10_percent/test/*/*.jpg',
+                                         shuffle=False):
+        filepaths.append(filepath.numpy())
+
+    most_wrong = pd.DataFrame({'img': filepaths,
+                            'y_true': y_labels,
+                            'y_pred': pred_labels,
+                            'pred_conf': pred_probs.max(axis=1),
+                            'y_true_classname': [class_names[i] for i in y_labels],
+                            'y_pred_classname': [class_names[i] for i in pred_labels]})
+
+    most_wrong['pred_correct'] = most_wrong['y_true'] == most_wrong['y_pred']
+
+    top_100_wrong = most_wrong[most_wrong['pred_correct'] == False].sort_values('pred_conf', ascending=Fale)[:100]
+    print(top_100_wrong.head(20))
 
 
 

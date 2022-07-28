@@ -25,7 +25,7 @@ def run():
     # Load dataset
     dataset_instance.load_dataset()
     # Preprocess dataset
-    dataset_instance.preprocess_dataset()
+    dataset_instance.preprocess_dataset(batch=8)
 
     # Getting train & test data
     train_data = dataset_instance.train_data
@@ -42,7 +42,7 @@ def run():
                                        monitor='val_accuracy',  # save the model weights with best validation accuracy
                                        save_best_only=True,  # only save the best weights
                                        save_weights_only=True,  # only save model weights (not whole model)
-                                       verbose=1)  # don't print out whether or not model is being saved
+                                       verbose=0)  # don't print out whether or not model is being saved
 
     '''Setup mixed precision training'''
 
@@ -124,7 +124,7 @@ def run():
     # Evaluate cloned model with loaded weights (should be same score as trained model)
     # results_cloned_model_with_loaded_weights = cloned_model.evaluate(test_data)
     # print(results_cloned_model_with_loaded_weights)
-    #
+
     # print(results_feature_extract_model == results_cloned_model_with_loaded_weights)
     # print(np.isclose(results_feature_extract_model, results_cloned_model_with_loaded_weights).all())
 
@@ -163,7 +163,7 @@ def run():
     # Unzip the SavedModel downloaded from Google Storage
 
     # Load and evaluate downloaded GS model
-    loaded_gs_model = load_model('models\\downloaded_gs_model\\07_efficientnetb0_feature_extract_model_mixed_precision')
+    loaded_fine_tune_model = load_model('models\\07_efficientnetb0_feature_extract_model_mixed_precision')
 
     # Get a summary of our downloaded model
     # loaded_gs_model.summary()
@@ -172,10 +172,12 @@ def run():
     # results_loaded_gs_model = loaded_gs_model.evaluate(test_data)
 
     # Are any of the layers in our model frozen?
-    for layer in loaded_gs_model.layers:
+    for layer in loaded_fine_tune_model.layers:
         layer.trainable = True  # set all layers to trainable
-        # print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)  # make sure loaded model is using mixed
+    #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)  # make sure loaded model is using mixed
                                                                              # precisiion dtype_policy ("mixed_float16")
+    # for layer in loaded_fine_tune_model.layers[1].layers:
+    #     print(layer.name, layer.trainable)
     # Check the layers in the base model and see what dtype policy they're using
     # for layer in loaded_gs_model.layers[1].layers[:20]:
     #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)
@@ -190,7 +192,8 @@ def run():
     checkpoint_path = 'checkpoints\\fine_tune_checkpoints\\'
     model_checkpoint = ModelCheckpoint(checkpoint_path,
                                        save_best_only=True,
-                                       monitor='val_loss')
+                                       monitor='val_loss',
+                                       verbose=0)
 
     # Creating Learning rate reduction callback
     reduce_lr = ReduceLROnPlateau(monitor='val_loss',
@@ -200,33 +203,33 @@ def run():
                                   min_lr=1e-7)
 
     # Compile the model
-    loaded_gs_model.compile(loss='sparse_categorical_crossentropy',
+    loaded_fine_tune_model.compile(loss='sparse_categorical_crossentropy',
                             optimizer=Adam(0.0001),
                             metrics=['accuracy'])
 
     # Start to fine-tune (all layers)
-    history_101_food_classes_all_data_fine_tune = loaded_gs_model.fit(train_data,
-                                                                      epochs=100,
-                                                                      steps_per_epoch=len(train_data),
-                                                                      validation_data=test_data,
-                                                                      validation_steps=int(0.15 * len(test_data)),
-                                                                      callbacks=[create_tensorboard_callback('training_log',
+    history_101_food_classes_all_data_fine_tune = loaded_fine_tune_model.fit(train_data,
+                                                                             epochs=100,
+                                                                             steps_per_epoch=len(train_data),
+                                                                             validation_data=test_data,
+                                                                             validation_steps=int(0.15 * len(test_data)),
+                                                                             callbacks=[create_tensorboard_callback('training_log',
                                                                                                              'efficientb0_101_classes_all_data_fine_tuning'),  # track the model training logs
-                                                                                 model_checkpoint,  # save only the best model during training
-                                                                                 early_stopping,  # stop model after X epochs of no improvements
-                                                                                 reduce_lr])  # reduce the learning rate after x epochs of no improvements
+                                                                                        model_checkpoint,  # save only the best model during training
+                                                                                        early_stopping,  # stop model after X epochs of no improvements
+                                                                                        reduce_lr])  # reduce the learning rate after x epochs of no improvements
 
     # # Save model
-    loaded_gs_model.save('models\\loaded_gs_model\\')
+    loaded_fine_tune_model.save('models\\loaded_fine_tune_model\\')
 
     # Evaluate mixed precision trained loaded model
-    results_loaded_gs_model_fine_tuned = loaded_gs_model.evaluate(test_data)
+    results_loaded_gs_model_fine_tuned = loaded_fine_tune_model.evaluate(test_data)
     # print(results_loaded_gs_model_fine_tuned)
 
     '''Download fine-tuned model from Google Storage'''
 
     # Load in fine-tuned model from local storage and evaluate
-    loaded_fine_tuned_gs_model = load_model('models\\loaded_gs_model')
+    loaded_fine_tuned_gs_model = load_model('models\\loaded_fine_tune_model')
 
     # Get a model summary (some model architecture as above)
     # loaded_fine_tuned_gs_model.summary()
