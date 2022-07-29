@@ -23,7 +23,7 @@ from helper_functions import plot_loss_curves, compare_histories, load_and_prep_
 from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_0_beginning import GettingData
 
 # Import function for make predictions and visualize it
-from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_1_big_dog_model import make_pred_and_visualize
+from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_1_big_dog_model import file_visualise_and_predict
 # Import function for build and compile model
 from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_1_big_dog_model import create_model
 from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_1_big_dog_model import compile_model
@@ -65,7 +65,7 @@ def run():
     class_names = get_data.get_class_names()
 
     # Make predictions on some my own chosen images of food
-    # make_pred_and_visualize(model, own_food_images, class_names)
+    # file_visualise_and_predict(model, own_food_images, class_names)
 
     '''Exercise - 2'''
 

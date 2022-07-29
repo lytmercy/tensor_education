@@ -10,7 +10,7 @@ from keras import mixed_precision
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 
 # Import helper functions
 from helper_functions import create_tensorboard_callback, make_confusion_matrix
@@ -20,6 +20,32 @@ from tensor_07_milestone_project_1.tensor_07_0_preprocess_data import Dataset
 from tensor_04_transfer_learning.tensor_04_part_3_scaling_up.tensor_04_p3_1_big_dog_model import autolabel
 
 INPUT_SHAPE = (224, 224, 3)
+
+
+def build_model(base_model, class_names):
+
+    # Initiate base_model from EfficientNetB0
+    based_model = base_model(include_top=False)
+    based_model.trainable = False
+
+    # Create Input layer
+    inputs = Input(shape=INPUT_SHAPE, name='input_layer')
+
+    # Build model with Keras functional API
+    x = based_model(inputs, training=False)
+    x = GlobalAveragePooling2D(name='global_average_pool_layer')(x)
+    # x = Dense(len(class_names), name='dense_layer')
+    # outputs = Activation('softmax', dtype=tf.float32, name='softmax_output_activation')(x)
+    outputs = Dense(len(class_names), activation='softmax', name='dense_output_layer')(x)
+    output_model = Model(inputs, outputs)
+
+    return output_model
+
+
+def compile_model(model):
+    model.compile(loss='sparse_categorical_crossentropy',
+                  optimizer=Adam(),
+                  metrics=['accuracy'])
 
 
 def run():
@@ -32,7 +58,7 @@ def run():
     # Load dataset
     dataset_instance.load_dataset()
     # Preprocess datasets
-    dataset_instance.preprocess_dataset(batch=14)
+    dataset_instance.preprocess_dataset(batch=13)
 
     # Getting train & test data
     train_data = dataset_instance.train_data
@@ -46,28 +72,13 @@ def run():
 
     # === Build feature extraction model ===
 
-    # Initiate base_model from EfficientNetB0
-    base_model = EfficientNetB0(include_top=False)
-    base_model.trainable = False
-
-    # Create Input layer
-    inputs = Input(shape=INPUT_SHAPE, name='input_layer')
-
-    # Build model with Keras functional API
-    x = base_model(inputs, training=False)
-    x = GlobalAveragePooling2D(name='global_average_pool_layer')(x)
-    # x = Dense(len(class_names), name='dense_layer')
-    # outputs = Activation('softmax', dtype=tf.float32, name='softmax_output_activation')(x)
-    outputs = Dense(len(class_names), activation='softmax', name='dense_output_layer')(x)
-    own_todo_model = Model(inputs, outputs)
+    own_todo_model = build_model(EfficientNetB0, class_names)
 
     # Check the model summary
     # own_todo_model.summary()
 
     # Compile model
-    own_todo_model.compile(loss='sparse_categorical_crossentropy',
-                           optimizer=Adam(),
-                           metrics=['accuracy'])
+    compile_model(own_todo_model)
 
     # === Build callbacks ===
 
@@ -79,11 +90,11 @@ def run():
                                        verbose=1)
     # Create EarlyStopping callbacks
     early_stopping = EarlyStopping(monitor='val_loss',
-                                   patience=3)  # for monitoring val_loss per 3 epochs
+                                   patience=5)  # for monitoring val_loss per 3 epochs
     # Create Reduce Learning rate callbacks
     reduce_lr = ReduceLROnPlateau(monitor='val_loss',
-                                  factor=0.2,  # for multiplying learning rate by 0.2 (reduce by x5)
-                                  patience=2,
+                                  factor=0.1,  # for multiplying learning rate by 0.2 (reduce by x5)
+                                  patience=1,
                                   verbose=1,
                                   min_lr=1e-7)
 
@@ -95,7 +106,7 @@ def run():
     #                                       steps_per_epoch=len(train_data),
     #                                       validation_data=test_data,
     #                                       validation_steps=int(.15 * len(test_data)),
-    #                                       callbacks=[create_tensorboard_callback('training_logs',
+    #                                       callbacks=[create_tensorboard_callback('training_log',
     #                                                                              'own_todo_feature_extract_model'),
     #                                                  model_checkpoint])
 
@@ -140,7 +151,7 @@ def run():
     #     print(layer.name, layer.trainable, layer.dtype_policy)
 
     # Create ModelCheckpoint callback to save best model during fine-tuning
-    checkpoint_path = 'checkpoints\\own_todo_model\\checkpoint.ckpt'
+    checkpoint_path = 'checkpoints\\own_todo_feature_extract_model\\checkpoint.ckpt'
     model_checkpoint = ModelCheckpoint(checkpoint_path,
                                        save_best_only=True,
                                        verbose=1)
@@ -155,24 +166,25 @@ def run():
     # Use 100 epochs as the default
     # Validate on 15% of the test_data
     # Use the create_tensorboard_callback, ModelCheckpoint and EarlyStopping callbacks
-    loaded_gs_history = loaded_feature_extract_model.fit(train_data,
-                                                         epochs=100,
-                                                         steps_per_epoch=len(train_data),
-                                                         validation_data=test_data,
-                                                         validation_steps=int(.15 * len(test_data)),
-                                                         callbacks=[create_tensorboard_callback('training_log',
-                                                                                                'loaded_todo_gs_fine_tuning_model'),
-                                                                    model_checkpoint,
-                                                                    early_stopping])
+    loaded_todo_fine_tune_history = loaded_feature_extract_model.fit(train_data,
+                                                                     epochs=100,
+                                                                     steps_per_epoch=len(train_data),
+                                                                     validation_data=test_data,
+                                                                     validation_steps=int(.15 * len(test_data)),
+                                                                     callbacks=[create_tensorboard_callback('training_log',
+                                                                                                            'loaded_todo_fine_tuning_model'),
+                                                                                model_checkpoint,
+                                                                                early_stopping,
+                                                                                reduce_lr])
 
     # Save model locally
-    loaded_feature_extract_model.save('models\\loaded_todo_fine_tuning_model\\')
+    loaded_feature_extract_model.save('models\\todo_fine_tuning_model\\')
 
     # Evaluate mixed precision trained fine-tuned model (this should beat DeepFood's 77.4% top-1 accuracy)
-    loaded_todo_fine_tuning_model = load_model('models\\loaded_todo_fine_tuning_model')
+    loaded_todo_fine_tuning_model = load_model('models\\todo_fine_tuning_model')
 
-    results_loaded_todo_gs_fine_tuning_model = loaded_todo_fine_tuning_model.evaluate(test_data)
-    print(results_loaded_todo_gs_fine_tuning_model)
+    results_loaded_todo_fine_tuning_model = loaded_todo_fine_tuning_model.evaluate(test_data)
+    # print(results_loaded_todo_gs_fine_tuning_model)
 
     '''TODO: View training results on TensorBoard'''
 
@@ -196,28 +208,34 @@ def run():
 
     y_labels = []
     for images, labels in test_data.unbatch():
-        y_labels.append(labels.numpy().argmax())
+        y_labels.append(labels.numpy())
+
+    print(accuracy_score(y_labels, pred_labels))
 
     # 1. Find precision, recall and f1 score
+    print(classification_report(y_labels, pred_labels))
 
     # Get a dictionary of the classification report
     classification_report_dict = classification_report(y_labels, pred_labels, output_dict=True)
+    print(classification_report_dict)
 
-    class_of_scores = {}
+    dict_of_scores = {}
 
     for k, v in classification_report_dict.items():
         if k == 'accuracy':  # stop once we get to accuracy key
             break
         else:
-            class_of_scores[class_names[int(k)]] = {'precision': v['precision'],
-                                                    'recall': v['recall'],
-                                                    'f1-score': v['f1-score']}
+            dict_of_scores[class_names[int(k)]] = (v['precision'],
+                                                   v['recall'],
+                                                   v['f1-score'])
 
+    print(dict_of_scores)
     # Turn class dictionary into dataframe for visualization
-    scores = pd.DataFrame({'class_name': list(class_of_scores.keys()),
-                           'precision': list(class_of_scores.values('precision')),
-                           'recall': list(class_of_scores.values('recall')),
-                           'f1-score': list(class_of_scores.values('f1-score'))}).sort_values('f1-score', ascending=False)
+    scores = pd.DataFrame({'class_name': list(dict_of_scores.keys()),
+                           'precision': list(dict_of_scores.values())[0],
+                           'recall': list(dict_of_scores.values())[1],
+                           'f1-score': list(dict_of_scores.values())[2]}).sort_values('f1-score', ascending=False)
+    print(scores.head())
 
     fig, ax = plt.subplots(figsize=(12, 25))
     fig_scores = ax.barh(range(len(scores)), scores['f1-score'].values)
@@ -245,15 +263,15 @@ def run():
         filepaths.append(filepath.numpy())
 
     most_wrong = pd.DataFrame({'img': filepaths,
-                            'y_true': y_labels,
-                            'y_pred': pred_labels,
-                            'pred_conf': pred_probs.max(axis=1),
-                            'y_true_classname': [class_names[i] for i in y_labels],
-                            'y_pred_classname': [class_names[i] for i in pred_labels]})
+                               'y_true': y_labels,
+                               'y_pred': pred_labels,
+                               'pred_conf': pred_probs.max(axis=1),
+                               'y_true_classname': [class_names[i] for i in y_labels],
+                               'y_pred_classname': [class_names[i] for i in pred_labels]})
 
     most_wrong['pred_correct'] = most_wrong['y_true'] == most_wrong['y_pred']
 
-    top_100_wrong = most_wrong[most_wrong['pred_correct'] == False].sort_values('pred_conf', ascending=Fale)[:100]
+    top_100_wrong = most_wrong[most_wrong['pred_correct'] == False].sort_values('pred_conf', ascending=False)[:100]
     print(top_100_wrong.head(20))
 
 

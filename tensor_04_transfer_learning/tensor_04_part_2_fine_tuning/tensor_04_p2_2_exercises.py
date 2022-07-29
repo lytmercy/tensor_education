@@ -22,7 +22,7 @@ IMG_SIZE = (224, 224)
 BATCH_SIZE = 32
 
 
-def visualize_and_pred(model, dataset, classes):
+def dataset_visualise_and_predict(model, dataset, classes):
     """Visualize any one random image from dataset and make prediction on it using a trained model.
 
     :param model: a some trained model for making predictions.
@@ -154,7 +154,7 @@ def run():
     #                                          checkpoint_callback])
 
     # call function for visualize and pred
-    # visualize_and_pred(own_model_1, train_data, class_name)
+    # dataset_visualise_and_predict(own_model_1, train_data, class_name)
     # plt.show()
 
     '''Exercise - 2'''

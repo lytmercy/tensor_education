@@ -164,7 +164,7 @@ def load_and_prep_image(filename, img_shape=224, scale=True):
         return img
 
 
-def make_pred_and_visualize(model, food_datasets, class_names):
+def file_visualise_and_predict(model, food_datasets, class_names):
     for img in food_datasets:
         img = load_and_prep_image(img, scale=False)
         pred_prob = model.predict(tf.expand_dims(img, axis=0))
@@ -474,4 +474,4 @@ def run():
     # print(custom_food_images)
 
     # Make predictions on custom food images
-    make_pred_and_visualize(model, custom_food_images, class_names)
+    file_visualise_and_predict(model, custom_food_images, class_names)

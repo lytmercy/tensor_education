@@ -25,7 +25,7 @@ def run():
     # Load dataset
     dataset_instance.load_dataset()
     # Preprocess dataset
-    dataset_instance.preprocess_dataset(batch=8)
+    dataset_instance.preprocess_dataset(batch=13)
 
     # Getting train & test data
     train_data = dataset_instance.train_data
@@ -96,7 +96,7 @@ def run():
     #                                                         steps_per_epoch=len(train_data),
     #                                                         validation_data=test_data,
     #                                                         validation_steps=int(0.15 * len(test_data)),
-    #                                                         callbacks=[create_tensorboard_callback('training_logs',
+    #                                                         callbacks=[create_tensorboard_callback('training_log',
     #                                                                                                'efficientnetb0_101_classes_all_data_feature_extract'),
     #                                                                    model_checkpoint])
 
@@ -158,12 +158,8 @@ def run():
 
     '''Preparing our model's layers for fine-tuning'''
 
-    # Download the saved model from Google Storage
-    # wget.download('https://storage.googleapis.com/ztm_tf_course/food_vision/07_efficientnetb0_feature_extract_model_mixed_precision.zip')
-    # Unzip the SavedModel downloaded from Google Storage
-
     # Load and evaluate downloaded GS model
-    loaded_fine_tune_model = load_model('models\\07_efficientnetb0_feature_extract_model_mixed_precision')
+    loaded_feature_extract_model = load_model('models\\07_efficientnetb0_feature_extract_model_mixed_precision')
 
     # Get a summary of our downloaded model
     # loaded_gs_model.summary()
@@ -172,7 +168,7 @@ def run():
     # results_loaded_gs_model = loaded_gs_model.evaluate(test_data)
 
     # Are any of the layers in our model frozen?
-    for layer in loaded_fine_tune_model.layers:
+    for layer in loaded_feature_extract_model.layers:
         layer.trainable = True  # set all layers to trainable
     #     print(layer.name, layer.trainable, layer.dtype, layer.dtype_policy)  # make sure loaded model is using mixed
                                                                              # precisiion dtype_policy ("mixed_float16")
@@ -203,41 +199,45 @@ def run():
                                   min_lr=1e-7)
 
     # Compile the model
-    loaded_fine_tune_model.compile(loss='sparse_categorical_crossentropy',
-                            optimizer=Adam(0.0001),
-                            metrics=['accuracy'])
+    loaded_feature_extract_model.compile(loss='sparse_categorical_crossentropy',
+                                         optimizer=Adam(0.0001),
+                                         metrics=['accuracy'])
 
     # Start to fine-tune (all layers)
-    history_101_food_classes_all_data_fine_tune = loaded_fine_tune_model.fit(train_data,
-                                                                             epochs=100,
-                                                                             steps_per_epoch=len(train_data),
-                                                                             validation_data=test_data,
-                                                                             validation_steps=int(0.15 * len(test_data)),
-                                                                             callbacks=[create_tensorboard_callback('training_log',
-                                                                                                             'efficientb0_101_classes_all_data_fine_tuning'),  # track the model training logs
-                                                                                        model_checkpoint,  # save only the best model during training
-                                                                                        early_stopping,  # stop model after X epochs of no improvements
-                                                                                        reduce_lr])  # reduce the learning rate after x epochs of no improvements
+    history_101_all_data_fine_tune = loaded_feature_extract_model.fit(train_data,
+                                                                      epochs=100,
+                                                                      steps_per_epoch=len(train_data),
+                                                                      validation_data=test_data,
+                                                                      validation_steps=int(0.15 * len(test_data)),
+                                                                      # track the model training logs
+                                                                      callbacks=[create_tensorboard_callback('training_log',
+                                                                                                             'efficientb0_101_all_data_fine_tuning'),
+                                                                                 # save only the best model during training
+                                                                                 model_checkpoint,
+                                                                                 # stop model after X epochs of no improvements
+                                                                                 early_stopping,
+                                                                                 # reduce the learning rate after x epochs of no improvements
+                                                                                 reduce_lr])
 
     # # Save model
-    loaded_fine_tune_model.save('models\\loaded_fine_tune_model\\')
+    loaded_feature_extract_model.save('models\\fine_tune_model\\')
 
     # Evaluate mixed precision trained loaded model
-    results_loaded_gs_model_fine_tuned = loaded_fine_tune_model.evaluate(test_data)
-    # print(results_loaded_gs_model_fine_tuned)
+    results_loaded_feature_extract_model = loaded_feature_extract_model.evaluate(test_data)
+    # print(results_loaded_feature_extract_model)
 
     '''Download fine-tuned model from Google Storage'''
 
     # Load in fine-tuned model from local storage and evaluate
-    loaded_fine_tuned_gs_model = load_model('models\\loaded_fine_tune_model')
+    loaded_fine_tune_model = load_model('models\\fine_tune_model')
 
     # Get a model summary (some model architecture as above)
-    # loaded_fine_tuned_gs_model.summary()
+    # loaded_fine_tune_model.summary()
 
     # Note: Even if you're loading in the model from Google Storage, you will still
     # need to load the test_data variable for this cell to work.
-    results_loaded_fine_tuned_gs_model = loaded_fine_tuned_gs_model.evaluate(test_data)
-    print(results_loaded_fine_tuned_gs_model)
+    results_loaded_fine_tuned_model = loaded_fine_tune_model.evaluate(test_data)
+    print(results_loaded_fine_tuned_model)
 
     '''View training results on TensorBoard'''
 
