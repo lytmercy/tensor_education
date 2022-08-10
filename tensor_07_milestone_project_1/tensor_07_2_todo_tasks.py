@@ -140,7 +140,7 @@ def run():
     # results_loaded_gs_model = loaded_feature_extract_model.evaluate(test_data)
     # print(results_loaded_gs_model)
 
-    # Set all of the layers .trainable variable in the loaded model to True (so they're unfrozen)
+    # Set all the layers .trainable variable in the loaded model to True (so they're unfrozen)
     loaded_feature_extract_model.trainable = True
 
     # Check to see what dtype_policy of the layers in your loaded model are
@@ -166,16 +166,16 @@ def run():
     # Use 100 epochs as the default
     # Validate on 15% of the test_data
     # Use the create_tensorboard_callback, ModelCheckpoint and EarlyStopping callbacks
-    loaded_todo_fine_tune_history = loaded_feature_extract_model.fit(train_data,
-                                                                     epochs=100,
-                                                                     steps_per_epoch=len(train_data),
-                                                                     validation_data=test_data,
-                                                                     validation_steps=int(.15 * len(test_data)),
-                                                                     callbacks=[create_tensorboard_callback('training_log',
-                                                                                                            'loaded_todo_fine_tuning_model'),
-                                                                                model_checkpoint,
-                                                                                early_stopping,
-                                                                                reduce_lr])
+    # loaded_todo_fine_tune_history = loaded_feature_extract_model.fit(train_data,
+    #                                                                  epochs=100,
+    #                                                                  steps_per_epoch=len(train_data),
+    #                                                                  validation_data=test_data,
+    #                                                                  validation_steps=int(.15 * len(test_data)),
+    #                                                                  callbacks=[create_tensorboard_callback('training_log',
+    #                                                                                                         'loaded_todo_fine_tuning_model'),
+    #                                                                             model_checkpoint,
+    #                                                                             early_stopping,
+    #                                                                             reduce_lr])
 
     # Save model locally
     loaded_feature_extract_model.save('models\\todo_fine_tuning_model\\')

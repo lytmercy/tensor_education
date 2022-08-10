@@ -179,15 +179,15 @@ def run():
 
     # Fit model for fine-tuning
     history_efficientnetb4_fine_tune_model = loaded_efficientnetb4_model.fit(train_data,
-                                                                      epochs=100,
-                                                                      steps_per_epoch=len(train_data),
-                                                                      validation_data=test_data,
-                                                                      validation_steps=int(.15 * len(test_data)),
-                                                                      callbacks=[create_tensorboard_callback('training_log',
-                                                                                                             'efficientnetb4_101_classes_all_data_fine_tune'),
-                                                                                 model_checkpoint,
-                                                                                 early_stopping,
-                                                                                 reduce_lr])
+                                                                             epochs=100,
+                                                                             steps_per_epoch=len(train_data),
+                                                                             validation_data=test_data,
+                                                                             validation_steps=int(.15 * len(test_data)),
+                                                                             callbacks=[create_tensorboard_callback('training_log',
+                                                                                                                    'efficientnetb4_101_classes_all_data_fine_tune'),
+                                                                                        model_checkpoint,
+                                                                                        early_stopping,
+                                                                                        reduce_lr])
 
     # Evaluate model
     results_efficientnetb4_fine_tune_model = loaded_efficientnetb4_model.evaluate(test_data)
