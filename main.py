@@ -31,6 +31,9 @@ from tensor_04_transfer_learning.tensor_04_part_3_scaling_up import tensor_04_p3
 # Import scripts of tensor 07
 from tensor_07_milestone_project_1 import tensor_07_0_preprocess_data, tensor_07_1_modeling
 from tensor_07_milestone_project_1 import tensor_07_2_todo_tasks, tensor_07_3_exercises
+# Import scripts of tensor 08
+from tensor_08_nlp_with_tf import tensor_08_0_preprocess_data, tensor_08_1_modeling
+from tensor_08_nlp_with_tf import tensor_08_2_exercises
 
 
 def main():
@@ -87,8 +90,13 @@ def main():
     # scripts of tensor 07 of milestone project_1: Food Vision
     # tensor_07_0_preprocess_data.run()
     # tensor_07_1_modeling.run()
-    tensor_07_2_todo_tasks.run()
+    # tensor_07_2_todo_tasks.run()
     # tensor_07_2_exercises.run()
+
+    # scripts of tensor 08 of Natural Language Processing with TensorFlow
+    tensor_08_0_preprocess_data.run()
+    # tensor_08_1_modeling.run()
+    # tensor_08_2_exercises.run()
 
 
 if __name__ == "__main__":
