@@ -1,8 +1,10 @@
 # Importing TensorFlow and Keras libraries
 import tensorflow as tf
+import tensorflow_hub as hub
+from keras import Sequential
 from keras.layers import Input, GlobalAveragePooling1D, Dense
 from keras.layers import TextVectorization, Embedding
-from keras.layers import LSTM, GRU, Bidirectional
+from keras.layers import LSTM, GRU, Bidirectional, Conv1D, GlobalMaxPool1D
 from keras.optimizers import Adam
 from keras import Model
 
@@ -210,6 +212,7 @@ def run():
     # out_vector.close()
     # out_metadata.close()
 
+    '''Recurrent Neural Networks (RNN)'''
     '''Model 2: LSTM (Long-short term memory)'''
 
     # Set random seed and create embedding layer (new embedding layer for each model)
@@ -264,7 +267,7 @@ def run():
     # Compare model 2 to baseline
     # compare_baseline_to_new_results(baseline_results, model_2_results)
 
-    '''Model 3: GRU'''
+    '''Model 3: GRU (Gated Recurrent Unit)'''
 
     # Set random seed and create embedding layer (new embedding layer` for each model)
     tf.random.set_seed(42)
@@ -369,7 +372,127 @@ def run():
     # compare_baseline_to_new_results(baseline_results, model_4_results)
 
     '''Convolutional Neural Networks for Text'''
+    '''Model 5: Conv1D'''
 
+    # Test out the embedding, 1D convolutional and max pooling
+    embedding_test = embedding(text_vectorizer(["this is a test sentence"]))  # turn target sentence into embedding
+    conv_1d = Conv1D(filters=32, kernel_size=5, activation="relu")  # convolve over target sequence 5 words at a time
+    conv_1d_output = conv_1d(embedding_test)  # pass embedding through 1D convolutional layer
+    max_pool = GlobalMaxPool1D()
+    max_pool_output = max_pool(conv_1d_output)  # get the most important features
+    # print(embedding_test.shape, conv_1d_output.shape, max_pool_output.shape)
 
+    # See the outputs of each layer
+    # print(embedding_test[:1], conv_1d_output[:1], max_pool_output[:1])
+
+    # Set random seed and create embedding layer (new embedding layer for each model)
+    tf.random.set_seed(42)
+    model_5_embedding = Embedding(input_dim=max_vocab_length,
+                                  output_dim=128,
+                                  embeddings_initializer="uniform",
+                                  input_length=max_output_length,
+                                  name="embedding_5")
+
+    # Create 1-dimensional convolutional layer to model sequences
+    inputs = Input(shape=(1,), dtype="string")
+    x = text_vectorizer(inputs)
+    x = model_5_embedding(x)
+    x = Conv1D(filters=32, kernel_size=5, activation="relu")(x)
+    x = GlobalMaxPool1D()(x)
+    # x = Dense(64, activation="relu")(x)  # optional dense layer
+    outputs = Dense(1, activation="sigmoid")(x)
+    model_5 = Model(inputs, outputs, name="model_5_Conv1D")
+
+    # Compile model
+    model_5.compile(loss="binary_crossentropy",
+                    optimizer=Adam(),
+                    metrics=["accuracy"])
+
+    # Get a summary of our 1D Convolution model
+    # model_5.summary()
+
+    # Fit the model
+    # model_5_history = model_5.fit(train_sentences,
+    #                               train_labels,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      "Conv1D")])
+
+    # Make predictions with model_5
+    model_5_pred_probs = model_5.predict(val_sentences)
+    # print(model_5_pred_probs[:10])
+
+    # Convert model_5 prediction probabilities to labels
+    model_5_preds = tf.squeeze(tf.round(model_5_pred_probs))
+    # print(model_5_preds[:10])
+
+    # Calculate model_5 evaluation metrics
+    model_5_results = calculate_results(y_true=val_labels,
+                                        y_pred=model_5_preds)
+    # print(model_5_results)
+
+    # Compare model_5 results to baseline
+    # compare_baseline_to_new_results(baseline_results, model_5_results)
+
+    '''Using Pretrained Embeddings (transfer learning for NLP)'''
+    '''Model 6: TensorFlow Hub Pretrained sentence Encoder'''
+
+    sample_sentence = "There's a flood in my street!"
+    # Example of pretrained embedding with universal sentence encoder
+    embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")  # load Universal Sentence Encoder
+    embed_samples = embed([sample_sentence,
+                           "When you call the unisersal sentence encode on a sentence, it turns it into numbers."])
+    # print(embed_samples[0][:50])
+
+    # Each sentence has been encoded into a 512 dimension vector
+    # print(embed_samples[0].shape)
+
+    # We can use this encoding layer in place of our text_vectorizer and embedding layer
+    sentence_encoder_layer = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4",
+                                            input_shape=[],  # shape of inputs coming to our model
+                                            dtype=tf.string,  # data type of input coming to the USE layer
+                                            trainable=False,  # keep the pretrained weight
+                                                              # (we'll create a feature extractor)
+                                            name="USE")
+
+    # Create model using the Sequential API
+    model_6 = Sequential([
+        sentence_encoder_layer,
+        Dense(64, activation="relu"),
+        Dense(1, activation="sigmoid")
+    ], name="model_6_USE")
+
+    # Compile model
+    model_6.compile(loss="binary_crossentropy",
+                    optimizer=Adam(),
+                    metrics=["accuracy"])
+
+    model_6.summary()
+
+    # Train a classifier on top of pretrained embeddings
+    model_6_history = model_6.fit(train_sentences,
+                                  train_labels,
+                                  epochs=5,
+                                  validation_data=(val_sentences, val_labels),
+                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+                                                                         "tf_hub_sentence_encoder")])
+
+    # Make predictions with USE TF Hub model
+    model_6_pred_probs = model_6.predict(val_sentences)
+    print(model_6_pred_probs[:10])
+
+    # Convert prediction probabilities to labels
+    model_6_preds = tf.squeeze(tf.round(model_6_pred_probs))
+    print(model_6_preds[:10])
+
+    # Calculate model 6 performance metrics
+    model_6_results = calculate_results(val_labels, model_6_preds)
+    print(model_6_results)
+
+    # Compare TF Hub model to baseline
+    compare_baseline_to_new_results(baseline_results, model_6_results)
+
+    '''Model 7: TensorFlow Hub Pretrained Sentence Encoder 10% of the training data'''
 
 
