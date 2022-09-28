@@ -6,16 +6,21 @@ from keras.layers import Input, GlobalAveragePooling1D, Dense
 from keras.layers import TextVectorization, Embedding
 from keras.layers import LSTM, GRU, Bidirectional, Conv1D, GlobalMaxPool1D
 from keras.optimizers import Adam
+from keras.models import clone_model
 from keras import Model
+from keras import backend
 
 # Importing Sci-kit learn libraries
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.model_selection import train_test_split
 
 # Importing other libraries
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 import io
 
 # Importing helper functions
@@ -118,31 +123,31 @@ def run():
     # Try building model_1 with and without a GlobalAveragePooling1D() layer after the embedding layer. What happens?
     # Why do you think this is?
 
-    x_1 = text_vectorizer(inputs)
-    x_1 = embedding(x_1)
-    outputs_1 = Dense(1, activation="sigmoid")(x_1)
-    model_1_alt = Model(inputs, outputs_1, name="model_1_alternate")
+    # x_1 = text_vectorizer(inputs)
+    # x_1 = embedding(x_1)
+    # outputs_1 = Dense(1, activation="sigmoid")(x_1)
+    # model_1_alt = Model(inputs, outputs_1, name="model_1_alternate")
 
     # Compile model
     model_1.compile(loss="binary_crossentropy",
                     optimizer=Adam(),
                     metrics=["accuracy"])
 
-    model_1_alt.compile(loss="binary_crossentropy",
-                        optimizer=Adam(),
-                        metrics=["accuracy"])
+    # model_1_alt.compile(loss="binary_crossentropy",
+    #                     optimizer=Adam(),
+    #                     metrics=["accuracy"])
 
     # Get a summary of the model
     # model_1.summary()
     # model_1_alt.summary()
 
     # Fit the model
-    # model_1_history = model_1.fit(train_sentences,
-    #                               train_labels,
-    #                               epochs=5,
-    #                               validation_data=(val_sentences, val_labels),
-    #                               callbacks=[create_tensorboard_callback(dir_name=TENSOR_CALLBACK_SAVE_DIR,
-    #                                                                      experiment_name="simple_dense_model")])
+    model_1_history = model_1.fit(train_sentences,
+                                  train_labels,
+                                  epochs=5,
+                                  validation_data=(val_sentences, val_labels),
+                                  callbacks=[create_tensorboard_callback(dir_name=TENSOR_CALLBACK_SAVE_DIR,
+                                                                         experiment_name="simple_dense_model")])
 
     # === Exercise -1
     #   === Commented because model without a GlobalAveragePooling1D() layer after the embedding layer, gives an error
@@ -160,7 +165,7 @@ def run():
     # print(embedding.weights)
 
     # Getting embedding weights
-    embed_weights = model_1.get_layer("embedding_1").get_weights()[0]
+    # embed_weights = model_1.get_layer("embedding_1").get_weights()[0]
     # print(embed_weights.shape)
 
     # Make predictions (these come back in the form of probabilities)
@@ -192,7 +197,7 @@ def run():
 
     # Get the weight matrix of embedding layer
     # (these are the numerical patterns between the text in the training dataset the model has learned)
-    embed_weights = model_1.get_layer("embedding_1").get_weights()[0]
+    # embed_weights = model_1.get_layer("embedding_1").get_weights()[0]
     # print(embed_weights.shape)  # same size as vocab size and embedding_dim (each word is a embedding_dim size vector)
 
     # == Code below is adapted from: tensorflow.org tutorials ==
@@ -244,12 +249,12 @@ def run():
     # model_2.summary()
 
     # Fit model
-    # model_2_history = model_2.fit(train_sentences,
-    #                               train_labels,
-    #                               epochs=5,
-    #                               validation_data=(val_sentences, val_labels),
-    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-    #                                                                      "LSTM")])
+    model_2_history = model_2.fit(train_sentences,
+                                  train_labels,
+                                  epochs=5,
+                                  validation_data=(val_sentences, val_labels),
+                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+                                                                         "LSTM")])
 
     # Make predictions on the validation dataset
     model_2_pred_probs = model_2.predict(val_sentences)
@@ -297,12 +302,12 @@ def run():
     # model_3.summary()
 
     # Fit model
-    # model_3_history = model_3.fit(train_sentences,
-    #                               train_labels,
-    #                               epochs=5,
-    #                               validation_data=(val_sentences, val_labels),
-    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-    #                                                                      "GRU")])
+    model_3_history = model_3.fit(train_sentences,
+                                  train_labels,
+                                  epochs=5,
+                                  validation_data=(val_sentences, val_labels),
+                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+                                                                         "GRU")])
 
     # Make predictions on the validation data
     model_3_pred_probs = model_3.predict(val_sentences)
@@ -349,12 +354,12 @@ def run():
     # model_4.summary()
 
     # Fit the model (takes longer because of the bidirectional layers)
-    # model_4_history = model_4.fit(train_sentences,
-    #                               train_labels,
-    #                               epochs=5,
-    #                               validation_data=(val_sentences, val_labels),
-    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-    #                                                                      "bidirectional_RNN")])
+    model_4_history = model_4.fit(train_sentences,
+                                  train_labels,
+                                  epochs=5,
+                                  validation_data=(val_sentences, val_labels),
+                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+                                                                         "bidirectional_RNN")])
 
     # Make predictions with bidirectional RNN on the validation data
     model_4_pred_probs = model_4.predict(val_sentences)
@@ -412,12 +417,12 @@ def run():
     # model_5.summary()
 
     # Fit the model
-    # model_5_history = model_5.fit(train_sentences,
-    #                               train_labels,
-    #                               epochs=5,
-    #                               validation_data=(val_sentences, val_labels),
-    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-    #                                                                      "Conv1D")])
+    model_5_history = model_5.fit(train_sentences,
+                                  train_labels,
+                                  epochs=5,
+                                  validation_data=(val_sentences, val_labels),
+                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+                                                                         "Conv1D")])
 
     # Make predictions with model_5
     model_5_pred_probs = model_5.predict(val_sentences)
@@ -440,9 +445,9 @@ def run():
 
     sample_sentence = "There's a flood in my street!"
     # Example of pretrained embedding with universal sentence encoder
-    embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")  # load Universal Sentence Encoder
-    embed_samples = embed([sample_sentence,
-                           "When you call the unisersal sentence encode on a sentence, it turns it into numbers."])
+    # embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")  # load Universal Sentence Encoder
+    # embed_samples = embed([sample_sentence,
+    #                        "When you call the unisersal sentence encode on a sentence, it turns it into numbers."])
     # print(embed_samples[0][:50])
 
     # Each sentence has been encoded into a 512 dimension vector
@@ -468,7 +473,7 @@ def run():
                     optimizer=Adam(),
                     metrics=["accuracy"])
 
-    model_6.summary()
+    # model_6.summary()
 
     # Train a classifier on top of pretrained embeddings
     model_6_history = model_6.fit(train_sentences,
@@ -480,19 +485,154 @@ def run():
 
     # Make predictions with USE TF Hub model
     model_6_pred_probs = model_6.predict(val_sentences)
-    print(model_6_pred_probs[:10])
+    # print(model_6_pred_probs[:10])
 
     # Convert prediction probabilities to labels
     model_6_preds = tf.squeeze(tf.round(model_6_pred_probs))
-    print(model_6_preds[:10])
+    # print(model_6_preds[:10])
 
     # Calculate model 6 performance metrics
     model_6_results = calculate_results(val_labels, model_6_preds)
-    print(model_6_results)
+    # print(model_6_results)
 
     # Compare TF Hub model to baseline
-    compare_baseline_to_new_results(baseline_results, model_6_results)
+    # compare_baseline_to_new_results(baseline_results, model_6_results)
 
     '''Model 7: TensorFlow Hub Pretrained Sentence Encoder 10% of the training data'''
+
+    # NOTE: Making splits like this will lead to data leakage
+    # (some training examples in the validation set)
+
+    # === Wrong way to make splits (train_df_shuffled has already been split) ===
+
+    # One kind of correct way (there are more) to make data subset
+    # (split the already split  train_sentences/train_labels)
+    train_sentences_90_percent, train_sentences_10_percent, \
+    train_labels_90_percent, train_labels_10_percent = train_test_split(np.array(train_sentences),
+                                                                        train_labels,
+                                                                        test_size=0.1,
+                                                                        random_state=42)
+
+    # Check Length of 10 percent datasets
+    # print(f"Total training examples: {len(train_sentences)}")
+    # print(f"Length of 10% training examples: {len(train_sentences_10_percent)}")
+
+    # Check the number of targets in our subset of data
+    # (this should be cose to the distribution of labels in the original train_labels)
+    # print(pd.Series(train_labels_10_percent).value_counts())
+
+    # Clone model_6 but reset weights
+    # model_7 = clone_model(model_6)
+
+    # Creating pretrained embedding from scratch because my GPU can't load more than one pretrained embedding.
+    # sentence_encoder_layer = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4",
+    #                                         input_shape=[],  # shape of inputs coming to our model
+    #                                         dtype=tf.string,  # data type of input coming to the USE layer
+    #                                         trainable=False,  # keep the pretrained weight
+    #                                                           # (we'll create a feature extractor)
+    #                                         name="USE")
+
+    # Create model using the Sequential API
+    # model_7 = Sequential([
+    #     sentence_encoder_layer,
+    #     Dense(64, activation="relu"),
+    #     Dense(1, activation="sigmoid")
+    # ], name="model_6_USE")
+
+    # Compile model
+    # model_7.compile(loss="binary_crossentropy",
+    #                 optimizer=Adam(),
+    #                 metrics=["accuracy"])
+
+    # Get a summary (will be some as model_6)
+    # model_7.summary()
+
+    # Fit the model to 10% of the training data
+    # model_7_history = model_7.fit(x=train_sentences_10_percent,
+    #                               y=train_labels_10_percent,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      "10prcnt_tf_hub_sentence_encoder")])
+
+    # Make predictions with the model trained on 10% of the data
+    # model_7_pred_probs = model_7.predict(val_sentences)
+    # print(model_7_pred_probs[:10])
+
+    # Convert prediction probabilities to labels
+    # model_7_preds = tf.squeeze(tf.round(model_7_pred_probs))
+    # print(model_7_preds[:10])
+
+    # Calculate model results
+    # model_7_results = calculate_results(val_labels, model_7_preds)
+    # print(model_7_results)
+
+    # Compare to baseline
+    # compare_baseline_to_new_results(baseline_results, model_7_results)
+
+    '''Comparing the performance of each of our models'''
+
+    # Combine model results into a DataFrame
+    all_model_results = pd.DataFrame({"baseline": baseline_results,
+                                      "simple_dense": model_1_results,
+                                      "lstm": model_2_results,
+                                      "gru": model_3_results,
+                                      "bidirectional": model_4_results,
+                                      "conv1d": model_5_results,
+                                      "tf_hub_sentence_encoder": model_6_results})
+
+    # Another all_model_results with model_7 instead model_6
+    # all_model_results = pd.DataFrame({"baseline": baseline_results,
+    #                                   "simple_dense": model_1_results,
+    #                                   "lstm": model_2_results,
+    #                                   "gru": model_3_results,
+    #                                   "bidirectional": model_4_results,
+    #                                   "conv1d": model_5_results,
+    #                                   "tf_hub_10_sentence_encoder": model_7_results})
+
+    all_model_results = all_model_results.transpose()
+    # print(all_model_results)
+
+    # Reduce the accuracy to same scale as other metrics
+    # all_model_results["accuracy"] = all_model_results["accuracy"]/100
+
+    # Plot and compare all the model results
+    # all_model_results.plot(kind="bar", figsize=(10, 7)).legend(bbox_to_anchor=(1.0, 1.0))
+    # plt.show()
+
+    # Sort model results by f1-score
+    # all_model_results.sort_values("f1-score", ascending=False)["f1-score"].plot(kind="bar", figsize=(10, 7))
+    # plt.show()
+
+    # === View tensorboard logs of transfer learning modelling experiments (should be 4 models)
+    # = Upload TensorBoard dev records
+    # tensorboard dev upload( --logdir ./training_log/nlp_log \
+    #   --name "NLP modelling experiments" \
+    #   --description "A series of different NLP modellings experiments with various models" \
+    #   --one_shot  # exits the uploader when upload has finished
+
+    '''Combining our models (model ensembling/stacking)'''
+
+    # Get mean pred probs for 3 models
+    baseline_pred_probs = np.max(model_0.predict_proba(val_sentences), axis=1)  # get the prediciton probabilities from baseline model
+    combined_pred_probs = baseline_pred_probs + tf.squeeze(model_2_pred_probs, axis=1) + tf.squeeze(model_6_pred_probs)
+    combined_preds = tf.round(combined_pred_probs/3)  # average and round the prediction probabilities to get prediction classes
+    # print(combined_preds[:20])
+
+    # Calculate results from averaging the prediction probabilities
+    ensemble_results = calculate_results(val_labels, combined_preds)
+    # print(ensemble_results)
+
+    # Add our combined model's results to the results DataFrame
+    all_model_results.loc["ensemble_results"] = ensemble_results
+
+    # Convert the accuracy to the same scale as the rest of the results
+    all_model_results["accuracy"] = all_model_results["accuracy"]/100
+
+    # print(all_model_results)
+
+    '''Saving and loading a trained model'''
+
+    #
 
 
