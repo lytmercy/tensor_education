@@ -36,6 +36,10 @@ class PreprocessData:
                                                                                                         random_state=42)
         return self.train_sentences, self.train_labels, self.val_sentences, self.val_labels
 
+    def get_test_dataframe(self):
+
+        return self.test_df
+
 
 def run():
     """08.0 Preprocess data for NLP"""

@@ -8,7 +8,7 @@ from keras.layers import LSTM, GRU, Bidirectional, Conv1D, GlobalMaxPool1D
 from keras.optimizers import Adam
 from keras.models import clone_model
 from keras import Model
-from keras import backend
+from keras.models import load_model
 
 # Importing Sci-kit learn libraries
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
+import random
 
 # Importing helper functions
 from helper_functions import create_tensorboard_callback
@@ -129,9 +130,9 @@ def run():
     # model_1_alt = Model(inputs, outputs_1, name="model_1_alternate")
 
     # Compile model
-    model_1.compile(loss="binary_crossentropy",
-                    optimizer=Adam(),
-                    metrics=["accuracy"])
+    # model_1.compile(loss="binary_crossentropy",
+    #                 optimizer=Adam(),
+    #                 metrics=["accuracy"])
 
     # model_1_alt.compile(loss="binary_crossentropy",
     #                     optimizer=Adam(),
@@ -142,12 +143,12 @@ def run():
     # model_1_alt.summary()
 
     # Fit the model
-    model_1_history = model_1.fit(train_sentences,
-                                  train_labels,
-                                  epochs=5,
-                                  validation_data=(val_sentences, val_labels),
-                                  callbacks=[create_tensorboard_callback(dir_name=TENSOR_CALLBACK_SAVE_DIR,
-                                                                         experiment_name="simple_dense_model")])
+    # model_1_history = model_1.fit(train_sentences,
+    #                               train_labels,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(dir_name=TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      experiment_name="simple_dense_model")])
 
     # === Exercise -1
     #   === Commented because model without a GlobalAveragePooling1D() layer after the embedding layer, gives an error
@@ -169,16 +170,16 @@ def run():
     # print(embed_weights.shape)
 
     # Make predictions (these come back in the form of probabilities)
-    model_1_pred_probs = model_1.predict(val_sentences)
+    # model_1_pred_probs = model_1.predict(val_sentences)
     # print(model_1_pred_probs[:10])  # only print out the first 10 prediction probabilities
 
     # Turn prediction probabilities into single-dimension tensor of floats
-    model_1_preds = tf.squeeze(tf.round(model_1_pred_probs))  # squeeze removes single dimensions
+    # model_1_preds = tf.squeeze(tf.round(model_1_pred_probs))  # squeeze removes single dimensions
     # print(model_1_preds[:20])
 
     # Calculate model_1 metrics
-    model_1_results = calculate_results(y_true=val_labels,
-                                        y_pred=model_1_preds)
+    # model_1_results = calculate_results(y_true=val_labels,
+    #                                     y_pred=model_1_preds)
     # print(model_1_results)
 
     # Is our simple Keras model better than our baseline model?
@@ -242,31 +243,31 @@ def run():
     model_2 = Model(inputs, outputs, name="mode_2_LSTM")
 
     # Compile model
-    model_2.compile(loss="binary_crossentropy",
-                    optimizer=Adam(),
-                    metrics=["accuracy"])
+    # model_2.compile(loss="binary_crossentropy",
+    #                 optimizer=Adam(),
+    #                 metrics=["accuracy"])
 
     # model_2.summary()
 
     # Fit model
-    model_2_history = model_2.fit(train_sentences,
-                                  train_labels,
-                                  epochs=5,
-                                  validation_data=(val_sentences, val_labels),
-                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-                                                                         "LSTM")])
+    # model_2_history = model_2.fit(train_sentences,
+    #                               train_labels,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      "LSTM")])
 
     # Make predictions on the validation dataset
-    model_2_pred_probs = model_2.predict(val_sentences)
+    # model_2_pred_probs = model_2.predict(val_sentences)
     # print(model_2_pred_probs.shape, model_2_pred_probs[:10])  # view the shape and the first 10
 
     # Round out predictions and reduce to 1-dimensional array
-    model_2_preds = tf.squeeze(tf.round(model_2_pred_probs))
+    # model_2_preds = tf.squeeze(tf.round(model_2_pred_probs))
     # print(model_2_preds[:10])
 
     # Calculate LSTM model results
-    model_2_results = calculate_results(y_true=val_labels,
-                                        y_pred=model_2_preds)
+    # model_2_results = calculate_results(y_true=val_labels,
+    #                                     y_pred=model_2_preds)
     # print(model_2_results)
 
     # Compare model 2 to baseline
@@ -294,32 +295,32 @@ def run():
     model_3 = Model(inputs, outputs, name="model_3_GRU")
 
     # Compile model
-    model_3.compile(loss="binary_crossentropy",
-                    optimizer=Adam(),
-                    metrics=["accuracy"])
+    # model_3.compile(loss="binary_crossentropy",
+    #                 optimizer=Adam(),
+    #                 metrics=["accuracy"])
 
     # Get a summary of our model look like?
     # model_3.summary()
 
     # Fit model
-    model_3_history = model_3.fit(train_sentences,
-                                  train_labels,
-                                  epochs=5,
-                                  validation_data=(val_sentences, val_labels),
-                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-                                                                         "GRU")])
+    # model_3_history = model_3.fit(train_sentences,
+    #                               train_labels,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      "GRU")])
 
     # Make predictions on the validation data
-    model_3_pred_probs = model_3.predict(val_sentences)
+    # model_3_pred_probs = model_3.predict(val_sentences)
     # print(model_3_pred_probs.shape, model_3_pred_probs[:10])
 
     # Convert prediction probabilities to prediction classes
-    model_3_preds = tf.squeeze(tf.round(model_3_pred_probs))
+    # model_3_preds = tf.squeeze(tf.round(model_3_pred_probs))
     # print(model_3_preds[:10])
 
     # Calculate model_3 results
-    model_3_results = calculate_results(y_true=val_labels,
-                                        y_pred=model_3_preds)
+    # model_3_results = calculate_results(y_true=val_labels,
+    #                                     y_pred=model_3_preds)
     # print(model_3_results)
 
     # Compare to baseline
@@ -346,31 +347,31 @@ def run():
     model_4 = Model(inputs, outputs, name="model_4_Bidirectional")
 
     # Compile model
-    model_4.compile(loss="binary_crossentropy",
-                    optimizer=Adam(),
-                    metrics=["accuracy"])
+    # model_4.compile(loss="binary_crossentropy",
+    #                 optimizer=Adam(),
+    #                 metrics=["accuracy"])
 
     # Get a summary
     # model_4.summary()
 
     # Fit the model (takes longer because of the bidirectional layers)
-    model_4_history = model_4.fit(train_sentences,
-                                  train_labels,
-                                  epochs=5,
-                                  validation_data=(val_sentences, val_labels),
-                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-                                                                         "bidirectional_RNN")])
+    # model_4_history = model_4.fit(train_sentences,
+    #                               train_labels,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      "bidirectional_RNN")])
 
     # Make predictions with bidirectional RNN on the validation data
-    model_4_pred_probs = model_4.predict(val_sentences)
+    # model_4_pred_probs = model_4.predict(val_sentences)
     # print(model_4_pred_probs[:10])
 
     # Convert prediction probabilities to labels
-    model_4_preds = tf.squeeze(tf.round(model_4_pred_probs))
+    # model_4_preds = tf.squeeze(tf.round(model_4_pred_probs))
     # print(model_4_preds[:10])
 
     # Calculate bidirectional RNN model results
-    model_4_results = calculate_results(val_labels, model_4_preds)
+    # model_4_results = calculate_results(val_labels, model_4_preds)
     # print(model_4_results)
 
     # Check to see how the bidirectional model performs against the baseline
@@ -409,32 +410,32 @@ def run():
     model_5 = Model(inputs, outputs, name="model_5_Conv1D")
 
     # Compile model
-    model_5.compile(loss="binary_crossentropy",
-                    optimizer=Adam(),
-                    metrics=["accuracy"])
+    # model_5.compile(loss="binary_crossentropy",
+    #                 optimizer=Adam(),
+    #                 metrics=["accuracy"])
 
     # Get a summary of our 1D Convolution model
     # model_5.summary()
 
     # Fit the model
-    model_5_history = model_5.fit(train_sentences,
-                                  train_labels,
-                                  epochs=5,
-                                  validation_data=(val_sentences, val_labels),
-                                  callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
-                                                                         "Conv1D")])
+    # model_5_history = model_5.fit(train_sentences,
+    #                               train_labels,
+    #                               epochs=5,
+    #                               validation_data=(val_sentences, val_labels),
+    #                               callbacks=[create_tensorboard_callback(TENSOR_CALLBACK_SAVE_DIR,
+    #                                                                      "Conv1D")])
 
     # Make predictions with model_5
-    model_5_pred_probs = model_5.predict(val_sentences)
+    # model_5_pred_probs = model_5.predict(val_sentences)
     # print(model_5_pred_probs[:10])
 
     # Convert model_5 prediction probabilities to labels
-    model_5_preds = tf.squeeze(tf.round(model_5_pred_probs))
+    # model_5_preds = tf.squeeze(tf.round(model_5_pred_probs))
     # print(model_5_preds[:10])
 
     # Calculate model_5 evaluation metrics
-    model_5_results = calculate_results(y_true=val_labels,
-                                        y_pred=model_5_preds)
+    # model_5_results = calculate_results(y_true=val_labels,
+    #                                     y_pred=model_5_preds)
     # print(model_5_results)
 
     # Compare model_5 results to baseline
@@ -573,13 +574,13 @@ def run():
     '''Comparing the performance of each of our models'''
 
     # Combine model results into a DataFrame
-    all_model_results = pd.DataFrame({"baseline": baseline_results,
-                                      "simple_dense": model_1_results,
-                                      "lstm": model_2_results,
-                                      "gru": model_3_results,
-                                      "bidirectional": model_4_results,
-                                      "conv1d": model_5_results,
-                                      "tf_hub_sentence_encoder": model_6_results})
+    # all_model_results = pd.DataFrame({"baseline": baseline_results,
+    #                                   "simple_dense": model_1_results,
+    #                                   "lstm": model_2_results,
+    #                                   "gru": model_3_results,
+    #                                   "bidirectional": model_4_results,
+    #                                   "conv1d": model_5_results,
+    #                                   "tf_hub_sentence_encoder": model_6_results})
 
     # Another all_model_results with model_7 instead model_6
     # all_model_results = pd.DataFrame({"baseline": baseline_results,
@@ -590,7 +591,7 @@ def run():
     #                                   "conv1d": model_5_results,
     #                                   "tf_hub_10_sentence_encoder": model_7_results})
 
-    all_model_results = all_model_results.transpose()
+    # all_model_results = all_model_results.transpose()
     # print(all_model_results)
 
     # Reduce the accuracy to same scale as other metrics
@@ -614,25 +615,85 @@ def run():
     '''Combining our models (model ensembling/stacking)'''
 
     # Get mean pred probs for 3 models
-    baseline_pred_probs = np.max(model_0.predict_proba(val_sentences), axis=1)  # get the prediciton probabilities from baseline model
-    combined_pred_probs = baseline_pred_probs + tf.squeeze(model_2_pred_probs, axis=1) + tf.squeeze(model_6_pred_probs)
-    combined_preds = tf.round(combined_pred_probs/3)  # average and round the prediction probabilities to get prediction classes
+    # baseline_pred_probs = np.max(model_0.predict_proba(val_sentences), axis=1)  # get the prediciton probabilities from baseline model
+    # combined_pred_probs = baseline_pred_probs + tf.squeeze(model_2_pred_probs, axis=1) + tf.squeeze(model_6_pred_probs)
+    # combined_preds = tf.round(combined_pred_probs/3)  # average and round the prediction probabilities to get prediction classes
     # print(combined_preds[:20])
 
     # Calculate results from averaging the prediction probabilities
-    ensemble_results = calculate_results(val_labels, combined_preds)
+    # ensemble_results = calculate_results(val_labels, combined_preds)
     # print(ensemble_results)
 
     # Add our combined model's results to the results DataFrame
-    all_model_results.loc["ensemble_results"] = ensemble_results
+    # all_model_results.loc["ensemble_results"] = ensemble_results
 
     # Convert the accuracy to the same scale as the rest of the results
-    all_model_results["accuracy"] = all_model_results["accuracy"]/100
+    # all_model_results["accuracy"] = all_model_results["accuracy"]/100
 
     # print(all_model_results)
 
     '''Saving and loading a trained model'''
 
-    #
+    # Save TF Hub Sentence Encoder model to HDF5 format
+    # model_6.save("models\\nlp_model\\model_6.h5")
 
+    # Load model with custom Hub Layer (required with HDF5 format)
+    # loaded_model_6 = load_model("models\\nlp_model\\model_6.h5",
+    #                             custom_objects={"KerasLayer": hub.KerasLayer})
+
+    # How does our loaded model perform?
+    # print(loaded_model_6.evaluate(val_sentences, val_labels))
+
+    # Save TF Hub Sentence Encoder model to SavedModel format (default)
+    # model_6.save("models\\nlp_model\\model_6_SavedModel_format")
+
+    # Load TF Hub Sentence Encoder SavedModel
+    # loaded_model_6_SavedModel = load_model("models\\nlp_model\\model_6_SavedModel_format")
+
+    # Evaluate loaded SavedModel format
+    # print(loaded_model_6_SavedModel.evaluate(val_sentences, val_labels))
+
+    '''Finding the most wrong examples'''
+
+    # Create dataframe with validation sentences and best performing model predictions
+    val_df = pd.DataFrame({"text": val_sentences,
+                           "target": val_labels,
+                           "pred": model_6_preds,
+                           "pred_prob": tf.squeeze(model_6_pred_probs)})
+
+    print(val_df.head())
+
+    # Find the wrong predictions and sort by prediction probabilities
+    most_wrong = val_df[val_df["target"] != val_df["pred"]].sort_values("pred_prob", ascending=False)
+    print(most_wrong[:10])
+
+    # Check the false positives (model predicted 1 when should've been 0)
+    for row in most_wrong[:10].itertuples():  # loop through the top 10 rows (change the index to view different rows)
+        _, text, target, pred, prob = row
+        print(f"Target: {target}, Pred: {int(pred)}, Prob: {prob}")
+        print(f"Text:\n{text}\n")
+        print("----\n")
+
+    # Check the most wrong false negatives (model predicted 0 when should've predicted 1)
+    for row in most_wrong[-10:].itertuples():
+        _, text, target, pred, prob = row
+        print(f"Target: {target}, Pred: {int(pred)}, Prob: {prob}")
+        print(f"Text:\n{text}\n")
+        print("----\n")
+
+    '''Making predictions on the test dataset'''
+
+    # Define test dataframe
+    test_df = preprocess_data.get_test_dataframe()
+    # Making predictions
+    test_sentences = test_df["text"].to_list()
+    test_samples = random.sample(test_sentences, 10)
+    for test_sample in test_samples:
+        pred_prob = tf.squeeze(model_6.predict([test_sample]))  # has to be list
+        pred = tf.round(pred_prob)
+        print(f"Pred: {int(pred)}, Prob: {pred_prob}")
+        print(f"Text:\n{test_sample}n")
+        print("----\n")
+
+    '''Predicting on Tweets from the wild'''
 
