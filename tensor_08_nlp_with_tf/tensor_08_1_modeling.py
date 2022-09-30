@@ -23,6 +23,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import io
 import random
+import time
 
 # Importing helper functions
 from helper_functions import create_tensorboard_callback
@@ -54,6 +55,35 @@ def compare_baseline_to_new_results(baseline_results, new_model_results):
     for key, value in baseline_results.items():
         print(f"Baseline {key}: {value:.2f}, New {key}: {new_model_results[key]:.2f}, "
               f"Difference: {new_model_results[key]-value:.2f}")
+
+
+def predict_on_sentence(model, sentence):
+    """
+    Uses model to make a prediction on sentence;
+    :param model: pretrained model;
+    :param sentence: sample of sentence for prediction.
+    :return: the sentence, the predicted label and the prediction probability.
+    """
+    pred_prob = model.predict([sentence])
+    pred_label = tf.squeeze(tf.round(pred_prob)).numpy()
+    print(f"Pred: {pred_label}", "(real disaster)" if pred_label > 0 else "(not real disaster)", f"Prob: {pred_prob[0][0]}")
+    print(f"Text:\n{sentence}")
+
+
+def pred_timer(model, samples):
+    """
+    Times how long a model takes to make predictions on samples;
+    :param model: pretrained model;
+    :param samples: a list of text samples;
+    :return: total_time = total elapsed time for model to make predictions on samples;
+    time_per_pred = time in seconds per single sample.
+    """
+    start_time = time.perf_counter()  # get start time
+    model.predict(samples)  # make predictions
+    end_time = time.perf_counter()  # get finish time
+    total_time = end_time - start_time  # calculate how long predictions took to make
+    time_per_pred = total_time/len(samples)  # find prediction time per sample
+    return total_time, time_per_pred
 
 
 def run():
@@ -656,44 +686,88 @@ def run():
     '''Finding the most wrong examples'''
 
     # Create dataframe with validation sentences and best performing model predictions
-    val_df = pd.DataFrame({"text": val_sentences,
-                           "target": val_labels,
-                           "pred": model_6_preds,
-                           "pred_prob": tf.squeeze(model_6_pred_probs)})
+    # val_df = pd.DataFrame({"text": val_sentences,
+    #                        "target": val_labels,
+    #                        "pred": model_6_preds,
+    #                        "pred_prob": tf.squeeze(model_6_pred_probs)})
 
-    print(val_df.head())
+    # print(val_df.head())
 
     # Find the wrong predictions and sort by prediction probabilities
-    most_wrong = val_df[val_df["target"] != val_df["pred"]].sort_values("pred_prob", ascending=False)
-    print(most_wrong[:10])
+    # most_wrong = val_df[val_df["target"] != val_df["pred"]].sort_values("pred_prob", ascending=False)
+    # print(most_wrong[:10])
 
     # Check the false positives (model predicted 1 when should've been 0)
-    for row in most_wrong[:10].itertuples():  # loop through the top 10 rows (change the index to view different rows)
-        _, text, target, pred, prob = row
-        print(f"Target: {target}, Pred: {int(pred)}, Prob: {prob}")
-        print(f"Text:\n{text}\n")
-        print("----\n")
+    # for row in most_wrong[:10].itertuples():  # loop through the top 10 rows (change the index to view different rows)
+    #     _, text, target, pred, prob = row
+    #     print(f"Target: {target}, Pred: {int(pred)}, Prob: {prob}")
+    #     print(f"Text:\n{text}\n")
+    #     print("----\n")
 
     # Check the most wrong false negatives (model predicted 0 when should've predicted 1)
-    for row in most_wrong[-10:].itertuples():
-        _, text, target, pred, prob = row
-        print(f"Target: {target}, Pred: {int(pred)}, Prob: {prob}")
-        print(f"Text:\n{text}\n")
-        print("----\n")
+    # for row in most_wrong[-10:].itertuples():
+    #     _, text, target, pred, prob = row
+    #     print(f"Target: {target}, Pred: {int(pred)}, Prob: {prob}")
+    #     print(f"Text:\n{text}\n")
+    #     print("----\n")
 
     '''Making predictions on the test dataset'''
 
     # Define test dataframe
-    test_df = preprocess_data.get_test_dataframe()
+    # test_df = preprocess_data.get_test_dataframe()
     # Making predictions
-    test_sentences = test_df["text"].to_list()
-    test_samples = random.sample(test_sentences, 10)
-    for test_sample in test_samples:
-        pred_prob = tf.squeeze(model_6.predict([test_sample]))  # has to be list
-        pred = tf.round(pred_prob)
-        print(f"Pred: {int(pred)}, Prob: {pred_prob}")
-        print(f"Text:\n{test_sample}n")
-        print("----\n")
+    # test_sentences = test_df["text"].to_list()
+    # test_samples = random.sample(test_sentences, 10)
+    # for test_sample in test_samples:
+    #     pred_prob = tf.squeeze(model_6.predict([test_sample]))  # has to be list
+    #     pred = tf.round(pred_prob)
+    #     print(f"Pred: {int(pred)}, Prob: {pred_prob}")
+    #     print(f"Text:\n{test_sample}n")
+    #     print("----\n")
 
     '''Predicting on Tweets from the wild'''
 
+    # Turn Tweet into string
+    some_tweet = "Life like an ensemble: take the best choices from others and make your own"
+
+    # === Creating predict_on_sentence function for taking model & sample_sentence and return a prediction ===
+
+    # Make a prediction on Tweet from the wild
+    # predict_on_sentence(model=model_6,  # use the USE model
+    #                     sentence=some_tweet)
+
+    # Source from Tweeter
+    beirut_tweet_1 = "Reports that the smoke in Beirut sky contains nitric acid, which is toxic. Please share and refrain from stepping outside unless urgent. #Lebanon"
+
+    # Source from Tweeter
+    beirut_tweet_2 = "#Beirut declared a “devastated city”, two-week state of emergency officially declared. #Lebanon"
+
+    # Predict on disaster Tweet 1
+    # predict_on_sentence(model=model_6,
+    #                     sentence=beirut_tweet_1)
+
+    # Predict on disaster Tweet 2
+    # predict_on_sentence(model=model_6,
+    #                     sentence=beirut_tweet_2)
+
+    '''The speed/score tradeoff'''
+
+    # === Creating function for calculate the time of predictions ===
+
+    # Calculate TF Hub Sentence Encoder prediction times
+    model_6_total_pred_time, model_6_time_per_pred = pred_timer(model_6, val_sentences)
+    print(model_6_total_pred_time, model_6_time_per_pred)
+
+    # Calculate Naive Bayes prediction times
+    baseline_total_pred_time, baseline_time_per_pred = pred_timer(model_0, val_sentences)
+    print(baseline_total_pred_time, baseline_time_per_pred)
+
+    # Let's compare time per prediction versus our model's F1-scores
+    plt.figure(figsize=(10, 7))
+    plt.scatter(baseline_time_per_pred, baseline_results["f1-score"], label="baseline")
+    plt.scatter(model_6_time_per_pred, model_6_results["f1-score"], label="tf_hub_sentence_encoder")
+    plt.legend()
+    plt.title("F1-score versus time per prediction")
+    plt.xlabel("Time per prediction")
+    plt.ylabel("F1-score")
+    plt.show()
