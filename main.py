@@ -95,8 +95,8 @@ def main():
 
     # scripts of tensor 08 of Natural Language Processing with TensorFlow
     # tensor_08_0_preprocess_data.run()
-    tensor_08_1_modeling.run()
-    # tensor_08_2_exercises.run()
+    # tensor_08_1_modeling.run()
+    tensor_08_2_exercises.run()
 
 
 if __name__ == "__main__":

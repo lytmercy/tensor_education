@@ -31,6 +31,9 @@ from helper_functions import create_tensorboard_callback
 # Importing PreprocessingData class from tensor_08_0_preprocess_data.py
 from tensor_08_nlp_with_tf.tensor_08_0_preprocess_data import PreprocessData
 
+# Create directory to save TensorBoard logs
+TENSOR_CALLBACK_SAVE_DIR = "training_log\\nlp_log"
+
 
 def calculate_results(y_true, y_pred):
     """
@@ -122,9 +125,6 @@ def run():
     # print(baseline_results)
 
     '''Model 1: A simple dense model'''
-
-    # Create directory to save TensorBoard logs
-    TENSOR_CALLBACK_SAVE_DIR = "training_log\\nlp_log"
 
     max_vocab_length = preprocess_data.max_vocab_length
     max_output_length = preprocess_data.max_output_sequence_length
